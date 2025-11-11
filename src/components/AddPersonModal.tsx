@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Upload, User } from 'lucide-react';
+import { X, Upload, User, Calendar, MapPin } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -25,6 +25,7 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
     relation: '',
     birthYear: '',
     deathYear: '',
+    dateOfBirth: '',
     gender: 'other',
     photo: '',
     notes: '',
@@ -32,17 +33,30 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
     timeline: [],
     gallery: [],
     documents: [],
+    contact: {
+      city: '',
+      state: '',
+      country: '',
+    },
   });
 
   useEffect(() => {
     if (editingPerson) {
-      setFormData(editingPerson);
+      setFormData({
+        ...editingPerson,
+        contact: editingPerson.contact || {
+          city: '',
+          state: '',
+          country: '',
+        },
+      });
     } else {
       setFormData({
         name: '',
         relation: '',
         birthYear: '',
         deathYear: '',
+        dateOfBirth: '',
         gender: 'other',
         photo: '',
         notes: '',
@@ -50,6 +64,11 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
         timeline: [],
         gallery: [],
         documents: [],
+        contact: {
+          city: '',
+          state: '',
+          country: '',
+        },
       });
     }
   }, [editingPerson, open]);
@@ -186,12 +205,27 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
               </Select>
             </div>
 
-            {/* Birth Year */}
+            {/* Date of Birth */}
             <div>
-              <Label htmlFor="birthYear" className="text-[#2C3E2A] mb-2">Birth Year</Label>
+              <Label htmlFor="dateOfBirth" className="text-[#2C3E2A] mb-2 flex items-center gap-2">
+                <Calendar className="size-4" />
+                Date of Birth
+              </Label>
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth || ''}
+                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
+              />
+            </div>
+
+            {/* Birth Year (for backward compatibility) */}
+            <div>
+              <Label htmlFor="birthYear" className="text-[#2C3E2A] mb-2">Birth Year (Optional)</Label>
               <Input
                 id="birthYear"
-                value={formData.birthYear}
+                value={formData.birthYear || ''}
                 onChange={(e) => setFormData({ ...formData, birthYear: e.target.value })}
                 placeholder="e.g., 1950"
                 className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
@@ -203,9 +237,66 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
               <Label htmlFor="deathYear" className="text-[#2C3E2A] mb-2">Death Year</Label>
               <Input
                 id="deathYear"
-                value={formData.deathYear}
+                value={formData.deathYear || ''}
                 onChange={(e) => setFormData({ ...formData, deathYear: e.target.value })}
                 placeholder="e.g., 2020 (if applicable)"
+                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
+              />
+            </div>
+
+            {/* Location - City */}
+            <div>
+              <Label htmlFor="city" className="text-[#2C3E2A] mb-2 flex items-center gap-2">
+                <MapPin className="size-4" />
+                City
+              </Label>
+              <Input
+                id="city"
+                value={formData.contact?.city || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contact: { 
+                    ...formData.contact, 
+                    city: e.target.value 
+                  } 
+                })}
+                placeholder="e.g., Mumbai"
+                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
+              />
+            </div>
+
+            {/* Location - State */}
+            <div>
+              <Label htmlFor="state" className="text-[#2C3E2A] mb-2">State</Label>
+              <Input
+                id="state"
+                value={formData.contact?.state || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contact: { 
+                    ...formData.contact, 
+                    state: e.target.value 
+                  } 
+                })}
+                placeholder="e.g., Maharashtra"
+                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
+              />
+            </div>
+
+            {/* Location - Country */}
+            <div>
+              <Label htmlFor="country" className="text-[#2C3E2A] mb-2">Country</Label>
+              <Input
+                id="country"
+                value={formData.contact?.country || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contact: { 
+                    ...formData.contact, 
+                    country: e.target.value 
+                  } 
+                })}
+                placeholder="e.g., India"
                 className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
               />
             </div>
