@@ -1,13 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { TreePine, Users, Share2, FileText, Lock, Sparkles, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 
 export default function LandingPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const features = [
     {
@@ -69,7 +69,7 @@ export default function LandingPage() {
             <TreePine className="size-8 text-emerald-600" />
             <span className="text-xl">Parivaar</span>
           </div>
-          <Button onClick={() => navigate('/onboarding')} variant="outline">
+          <Button onClick={() => router.push('/onboarding')} variant="outline">
             Sign In
           </Button>
         </div>
@@ -91,7 +91,7 @@ export default function LandingPage() {
               Connect generations, share stories, and discover your family history with Parivaar's beautiful and intuitive family tree builder.
             </p>
             <Button 
-              onClick={() => navigate('/onboarding')}
+              onClick={() => router.push('/onboarding')}
               size="lg"
               className="bg-emerald-600 hover:bg-emerald-700"
             >
@@ -222,7 +222,7 @@ export default function LandingPage() {
             Join thousands of families preserving their heritage
           </p>
           <Button 
-            onClick={() => navigate('/onboarding')}
+            onClick={() => router.push('/onboarding')}
             size="lg"
             variant="secondary"
           >
