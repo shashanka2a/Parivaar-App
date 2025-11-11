@@ -16,6 +16,28 @@ interface Props {
   onEdit: (person: Person) => void;
 }
 
+// Utility function to format date from YYYY-MM-DD to dd-mm-yyyy
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      // If it's not a valid date, try parsing as YYYY-MM-DD
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        const [year, month, day] = parts;
+        return `${day}-${month}-${year}`;
+      }
+      return dateString; // Return as-is if can't parse
+    }
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch {
+    return dateString; // Return as-is if error
+  }
+};
+
 export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) {
   if (!person) return null;
 
@@ -79,7 +101,7 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
                 <p className="text-secondary-foreground text-sm mb-2 px-3 py-1 bg-secondary rounded-full inline-block">{person.relation}</p>
                 {person.dateOfBirth && (
                   <p className="text-sm text-muted-foreground mb-1">
-                    Born: {person.dateOfBirth}
+                    Born: {formatDate(person.dateOfBirth)}
                   </p>
                 )}
                 {(person.birthYear || person.deathYear) && !person.dateOfBirth && (
@@ -94,30 +116,30 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
 
             {/* Tabs */}
             <Tabs defaultValue="overview" className="p-4">
-              <TabsList className="grid w-full grid-cols-6 mb-6 h-auto p-1.5">
-                <TabsTrigger value="overview" className="py-2.5 px-3">
-                  <User className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Overview</span>
+              <TabsList className="grid w-full grid-cols-6 mb-6 h-auto p-1.5 gap-1.5">
+                <TabsTrigger value="overview" className="py-2.5 px-4 gap-2 min-w-0">
+                  <User className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Overview</span>
                 </TabsTrigger>
-                <TabsTrigger value="personal" className="py-2.5 px-3">
-                  <Heart className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Personal</span>
+                <TabsTrigger value="personal" className="py-2.5 px-4 gap-2 min-w-0">
+                  <Heart className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Personal</span>
                 </TabsTrigger>
-                <TabsTrigger value="education" className="py-2.5 px-3">
-                  <GraduationCap className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Education</span>
+                <TabsTrigger value="education" className="py-2.5 px-4 gap-2 min-w-0">
+                  <GraduationCap className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Education</span>
                 </TabsTrigger>
-                <TabsTrigger value="career" className="py-2.5 px-3">
-                  <Briefcase className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Career</span>
+                <TabsTrigger value="career" className="py-2.5 px-4 gap-2 min-w-0">
+                  <Briefcase className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Career</span>
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="py-2.5 px-3">
-                  <MapPin className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Contact</span>
+                <TabsTrigger value="contact" className="py-2.5 px-4 gap-2 min-w-0">
+                  <MapPin className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Contact</span>
                 </TabsTrigger>
-                <TabsTrigger value="media" className="py-2.5 px-3">
-                  <Image className="size-4 md:mr-2" />
-                  <span className="hidden md:inline">Media</span>
+                <TabsTrigger value="media" className="py-2.5 px-4 gap-2 min-w-0">
+                  <Image className="size-4 shrink-0" />
+                  <span className="hidden md:inline truncate">Media</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -141,7 +163,7 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
                   <InfoCard label="Full Name" value={person.name} />
                   <InfoCard label="Relation" value={person.relation} />
                   <InfoCard label="Gender" value={person.gender} className="capitalize" />
-                  {person.dateOfBirth && <InfoCard label="Date of Birth" value={person.dateOfBirth} />}
+                  {person.dateOfBirth && <InfoCard label="Date of Birth" value={formatDate(person.dateOfBirth)} />}
                   {person.marriageDate && <InfoCard label="Marriage Date" value={person.marriageDate} />}
                   {person.bloodGroup && <InfoCard label="Blood Group" value={person.bloodGroup} />}
                 </div>
@@ -283,7 +305,7 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
                           <Calendar className="size-4 text-blue-500" />
                           <div className="flex-1">
                             <p className="text-xs text-gray-500">Date of Birth</p>
-                            <p className="mt-1">{person.dateOfBirth}</p>
+                            <p className="mt-1">{formatDate(person.dateOfBirth)}</p>
                           </div>
                         </div>
                       </Card>

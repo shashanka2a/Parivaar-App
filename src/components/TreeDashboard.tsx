@@ -34,7 +34,6 @@ export default function TreeDashboard({ appState, setAppState }: Props) {
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [detailedEditPerson, setDetailedEditPerson] = useState<Person | null>(null);
   const [detailedEditModalOpen, setDetailedEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleSave = () => {
     toast.success('Family tree saved successfully!');
@@ -257,7 +256,10 @@ export default function TreeDashboard({ appState, setAppState }: Props) {
           </DropdownMenu>
 
           <Button 
-            onClick={() => setIsAddModalOpen(true)} 
+            onClick={() => {
+              setEditingPerson(null);
+              setAddPersonModalOpen(true);
+            }} 
             size="sm" 
             className="bg-[#4CAF50] hover:bg-[#3D9141] text-white shadow-sm"
           >
