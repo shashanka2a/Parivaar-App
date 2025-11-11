@@ -169,27 +169,27 @@ export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate 
             {/* Tabs */}
             <Tabs defaultValue="overview" className="p-4">
               <TabsList className="grid w-full grid-cols-6 mb-6 h-auto p-1.5 gap-1.5">
-                <TabsTrigger value="overview" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="overview" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <User className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Overview</span>
                 </TabsTrigger>
-                <TabsTrigger value="personal" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="personal" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Heart className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Personal</span>
                 </TabsTrigger>
-                <TabsTrigger value="education" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="education" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <GraduationCap className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Education</span>
                 </TabsTrigger>
-                <TabsTrigger value="career" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="career" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Briefcase className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Career</span>
                 </TabsTrigger>
-                <TabsTrigger value="contact" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="contact" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <MapPin className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Contact</span>
                 </TabsTrigger>
-                <TabsTrigger value="media" className="py-2.5 px-4 gap-2 min-w-0">
+                <TabsTrigger value="media" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Image className="size-4 shrink-0" />
                   <span className="hidden md:inline truncate">Media</span>
                 </TabsTrigger>

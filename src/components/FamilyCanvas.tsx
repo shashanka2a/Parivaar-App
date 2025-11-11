@@ -24,8 +24,13 @@ export default function FamilyCanvas({ familyTree, theme, onNodeClick, onEditPer
     return acc;
   }, {} as Record<number, Person[]>);
 
-  // Sort from ancestors (negative) to descendants (positive) - REVERSED ORDER
-  const sortedGenerations = Object.entries(generations).sort(([a], [b]) => Number(a) - Number(b));
+  // Sort from ancestors (negative) to descendants (positive)
+  // Negative numbers (ancestors) come first, then 0 (self), then positive (descendants)
+  const sortedGenerations = Object.entries(generations).sort(([a], [b]) => {
+    const genA = Number(a);
+    const genB = Number(b);
+    return genA - genB; // This ensures -2 < -1 < 0 < 1 < 2
+  });
 
   // Get generation label
   const getGenerationLabel = (generation: number) => {

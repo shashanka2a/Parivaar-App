@@ -78,7 +78,7 @@ export default function TreeNodeCard({ person, theme, onClick, onEdit }: Props) 
 
       {/* Relation Badge */}
       <div className="flex justify-center mb-3">
-        <span className="text-[13px] text-[#3D5A3A] px-3 py-1.5 bg-[#4CAF50]/10 rounded-full border border-[#4CAF50]/20" style={{ fontWeight: 500 }}>{person.relation}</span>
+        <span className="text-[13px] text-[#3D5A3A] px-3 py-1.5 bg-[#4CAF50]/10 rounded-full border border-[#4CAF50]/20 truncate max-w-full" style={{ fontWeight: 500 }} title={person.relation}>{person.relation}</span>
       </div>
 
       {/* Birth/Death Years */}
