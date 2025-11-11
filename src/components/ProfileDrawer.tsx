@@ -1,19 +1,21 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit2, User, BookOpen, GraduationCap, Briefcase, MapPin, Phone, Image, FileText, Heart, Calendar, Ruler, Droplet, Users, Mail, Home, Star, Circle, Weight as WeightIcon, Activity } from 'lucide-react';
+import { X, Edit2, User, BookOpen, GraduationCap, Briefcase, MapPin, Phone, Image, FileText, Heart, Calendar, Ruler, Droplet, Users, Mail, Home, Star, Circle, Weight as WeightIcon, Activity, Pencil } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card } from './ui/card';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 import { Person } from '@/lib/state-context';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   person: Person | null;
   onEdit: (person: Person) => void;
+  onUpdate?: (person: Person) => void;
 }
 
 // Utility function to format date from YYYY-MM-DD to dd-mm-yyyy
@@ -38,8 +40,41 @@ const formatDate = (dateString: string): string => {
   }
 };
 
-export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) {
+export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate }: Props) {
   if (!person) return null;
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && person) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedPerson: Person = {
+          ...person,
+          photo: reader.result as string,
+        };
+        if (onUpdate) {
+          onUpdate(updatedPerson);
+          toast.success('Profile photo updated successfully!');
+        }
+      };
+      reader.onerror = () => {
+        toast.error('Failed to upload image. Please try again.');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -86,17 +121,34 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
             {/* Profile Header */}
             <div className="p-6 border-b bg-gradient-to-br from-[#E9F5E2] to-[#C7E9C0]/30">
               <div className="flex flex-col items-center text-center">
-                {person.photo ? (
-                  <img
-                    src={person.photo}
-                    alt={person.name}
-                    className="size-32 rounded-full object-cover border-4 border-white shadow-lg mb-4"
+                <div className="relative group">
+                  {person.photo ? (
+                    <img
+                      src={person.photo}
+                      alt={person.name}
+                      className="size-32 rounded-full object-cover border-4 border-white shadow-lg mb-4"
+                    />
+                  ) : (
+                    <div className="size-32 rounded-full bg-muted flex items-center justify-center border-4 border-white shadow-lg mb-4">
+                      <User className="size-16 text-muted-foreground" />
+                    </div>
+                  )}
+                  {/* Pen Icon Overlay */}
+                  <label
+                    htmlFor="profile-photo-upload"
+                    className="absolute bottom-2 right-2 bg-[#4CAF50] text-white rounded-full p-2.5 cursor-pointer hover:bg-[#3D9141] transition-colors shadow-lg group-hover:opacity-100 opacity-90 z-10"
+                    title="Upload photo"
+                  >
+                    <Pencil className="size-4" />
+                  </label>
+                  <input
+                    id="profile-photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
                   />
-                ) : (
-                  <div className="size-32 rounded-full bg-muted flex items-center justify-center border-4 border-white shadow-lg mb-4">
-                    <User className="size-16 text-muted-foreground" />
-                  </div>
-                )}
+                </div>
                 <h3 className="text-2xl mb-1" style={{ fontWeight: 600 }}>{person.name}</h3>
                 <p className="text-secondary-foreground text-sm mb-2 px-3 py-1 bg-secondary rounded-full inline-block">{person.relation}</p>
                 {person.dateOfBirth && (
@@ -203,7 +255,7 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
                         <div className="flex items-center gap-3">
                           <Activity className="size-4 text-purple-500" />
                           <div className="flex-1">
-                            <p className="text-xs text-gray-500">Moola Padam</p>
+                            <p className="text-xs text-gray-500">Padam</p>
                             <p className="mt-1">{person.moolaPadam}</p>
                           </div>
                         </div>
@@ -220,13 +272,13 @@ export default function ProfileDrawer({ open, onClose, person, onEdit }: Props) 
                         </div>
                       </Card>
                     )}
-                    {person.janmaRasi && (
+                    {person.birthPlace && (
                       <Card className="p-4">
                         <div className="flex items-center gap-3">
-                          <Circle className="size-4 text-indigo-500" />
+                          <MapPin className="size-4 text-blue-500" />
                           <div className="flex-1">
-                            <p className="text-xs text-gray-500">Janma Rasi</p>
-                            <p className="mt-1">{person.janmaRasi}</p>
+                            <p className="text-xs text-gray-500">Birth Place</p>
+                            <p className="mt-1">{person.birthPlace}</p>
                           </div>
                         </div>
                       </Card>

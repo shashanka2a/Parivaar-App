@@ -21,10 +21,10 @@ export interface Person {
   // Detailed fields
   biography?: string;
   dateOfBirth?: string;
+  birthPlace?: string;
   nakshatram?: string;
   moolaPadam?: string;
   rasi?: string;
-  janmaRasi?: string;
   height?: string;
   weight?: string;
   bloodGroup?: string;

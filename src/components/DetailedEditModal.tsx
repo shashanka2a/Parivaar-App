@@ -184,7 +184,7 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                     />
                   </div>
                   <div>
-                    <Label htmlFor="moolaPadam">Moola Padam</Label>
+                    <Label htmlFor="moolaPadam">Padam</Label>
                     <Input
                       id="moolaPadam"
                       value={formData.moolaPadam || ''}
@@ -198,15 +198,6 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                       id="rasi"
                       value={formData.rasi || ''}
                       onChange={(e) => setFormData({ ...formData, rasi: e.target.value })}
-                      placeholder="e.g., Mesha"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="janmaRasi">Janma Rasi</Label>
-                    <Input
-                      id="janmaRasi"
-                      value={formData.janmaRasi || ''}
-                      onChange={(e) => setFormData({ ...formData, janmaRasi: e.target.value })}
                       placeholder="e.g., Mesha"
                     />
                   </div>
@@ -267,6 +258,15 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                       type="date"
                       value={formData.dateOfBirth || ''}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="birthPlace">Birth Place</Label>
+                    <Input
+                      id="birthPlace"
+                      value={formData.birthPlace || ''}
+                      onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+                      placeholder="e.g., Mumbai, Maharashtra"
                     />
                   </div>
                   <div>

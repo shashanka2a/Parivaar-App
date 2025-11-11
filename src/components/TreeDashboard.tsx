@@ -311,6 +311,7 @@ export default function TreeDashboard({ appState, setAppState }: Props) {
         onClose={() => setProfileDrawerOpen(false)}
         person={selectedPerson}
         onEdit={handleDetailedEdit}
+        onUpdate={handleUpdatePerson}
       />
 
       {/* Detailed Edit Modal */}
