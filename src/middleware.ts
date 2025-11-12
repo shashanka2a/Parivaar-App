@@ -6,22 +6,36 @@ import {
   isProtectedRoute,
   isApiRoute,
   isSharedRoute,
-  isValidShareLink,
 } from '@/lib/middleware-utils';
 import { createMiddlewareClient } from '@/lib/supabase-server';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Create Supabase client for middleware
-  const { supabase, response: supabaseResponse } = createMiddlewareClient(request);
+  // Skip middleware for public routes to avoid errors if env vars aren't set
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next();
+  }
   
-  // Refresh session if it exists
-  const { data: { session } } = await supabase.auth.getSession();
+  let supabaseResponse: NextResponse | null = null;
   
-  // If user has a session, refresh it
-  if (session) {
-    await supabase.auth.refreshSession();
+  try {
+    // Create Supabase client for middleware
+    const { supabase, response } = createMiddlewareClient(request);
+    supabaseResponse = response;
+    
+    // Refresh session if it exists
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // If user has a session, refresh it
+    if (session) {
+      await supabase.auth.refreshSession();
+    }
+  } catch (error) {
+    // If Supabase client creation fails (e.g., missing env vars), log and continue
+    // This allows the app to work even if env vars are not set
+    console.error('Middleware Supabase error (non-critical):', error);
+    supabaseResponse = NextResponse.next();
   }
   
   // Handle API routes
@@ -71,17 +85,9 @@ export async function middleware(request: NextRequest) {
   
   // Handle shared tree routes
   if (isSharedRoute(pathname)) {
-    // Extract shareId from pathname (e.g., /shared/abc123)
-    const shareId = pathname.split('/shared/')[1]?.split('/')[0];
-    
-    if (shareId) {
-      // Validate share link
-      const isValid = await isValidShareLink(shareId);
-      if (!isValid) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
-      }
-    }
-    
+    // Note: Share link validation is done in the page component
+    // Middleware can't use Prisma (Edge runtime limitation)
+    // Allow access and validate in the page component
     return NextResponse.next();
   }
   
