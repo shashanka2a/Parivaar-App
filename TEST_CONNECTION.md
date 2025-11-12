@@ -49,15 +49,7 @@ npx prisma db pull
 
 Before testing, make sure you have a `.env.local` file with:
 
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://frxpbnoornbecjutllfv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NDU4MDcsImV4cCI6MjA3ODUyMTgwN30.9D8gIrXT1PLeQ3Rtm6W3LulAMCaadz-XbRttbGQQGEo
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0NTgwNywiZXhwIjoyMDc4NTIxODA3fQ.wyfgKupWKjivBqjVl53kS5tiy1eenwhaeq6fp9bm614
 
-# Database Connection (get password from Supabase Dashboard)
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
-```
 
 ### Getting Your Database Password
 

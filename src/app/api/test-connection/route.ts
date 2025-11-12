@@ -32,13 +32,19 @@ export async function GET() {
     // Test anon client - try to get session (doesn't require database)
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
-    // Test admin client
-    const { data: adminData, error: adminError } = await supabaseAdmin.auth.getSession();
+    // Test admin client (if available)
+    let adminError = null;
+    if (supabaseAdmin) {
+      const { error } = await supabaseAdmin.auth.getSession();
+      adminError = error;
+    } else {
+      adminError = new Error('Service role key not configured');
+    }
 
     results.supabase.connected = !sessionError && !adminError;
     results.supabase.details = {
       anonClient: sessionError ? { error: sessionError.message } : { connected: true, hasSession: !!sessionData.session },
-      adminClient: adminError ? { error: adminError.message } : { connected: true },
+      adminClient: adminError ? { error: adminError.message || String(adminError) } : { connected: true },
       url: process.env.NEXT_PUBLIC_SUPABASE_URL,
     };
     

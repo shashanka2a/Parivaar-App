@@ -119,7 +119,10 @@ export async function GET(request: Request) {
 
   } catch (error: any) {
     console.error('Test error:', error);
-    testResults.tests.environment.details.error = error.message;
+    testResults.tests.environment.details = {
+      ...testResults.tests.environment.details,
+      error: error.message,
+    };
   }
 
   return NextResponse.json(testResults, { status: 200 });

@@ -2,16 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration - loaded from environment variables
 // Never expose these values in client-side code or commit them to git
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env file');
-}
-
 // Client-side Supabase client (for browser usage)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Use empty strings as fallback to avoid build-time errors
+// Actual validation happens at runtime
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -20,12 +18,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Server-side Supabase client with service role (for admin operations)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// Only create if service role key is available
+export const supabaseAdmin = supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null;
 
 // Helper function to get Supabase client based on context
 export function getSupabaseClient(useAdmin = false) {

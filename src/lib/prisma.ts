@@ -14,8 +14,8 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
 
 // Prisma Middleware - runs before queries
 // Note: $use is not available in Edge runtime, so we conditionally apply it
-if (typeof prisma.$use === 'function') {
-  prisma.$use(async (params, next) => {
+if ('$use' in prisma && typeof (prisma as any).$use === 'function') {
+  (prisma as any).$use(async (params: any, next: any) => {
     const before = Date.now();
     
     // Logging middleware
@@ -46,7 +46,7 @@ if (typeof prisma.$use === 'function') {
   });
 
   // Additional middleware for specific operations
-  prisma.$use(async (params, next) => {
+  (prisma as any).$use(async (params: any, next: any) => {
     // Add timestamps automatically
     if (params.action === 'create' || params.action === 'update') {
       // Timestamps are handled by Prisma schema, but you can add custom logic here
@@ -56,7 +56,7 @@ if (typeof prisma.$use === 'function') {
   });
 
   // Error handling middleware
-  prisma.$use(async (params, next) => {
+  (prisma as any).$use(async (params: any, next: any) => {
     try {
       return await next(params);
     } catch (error) {
