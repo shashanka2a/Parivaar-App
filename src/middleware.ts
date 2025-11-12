@@ -8,25 +8,33 @@ import {
   isSharedRoute,
   isValidShareLink,
 } from '@/lib/middleware-utils';
+import { createMiddlewareClient } from '@/lib/supabase-server';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Get authentication token from cookies or headers
-  const token = request.cookies.get('auth-token')?.value;
-  const sessionId = request.cookies.get('session-id')?.value;
+  // Create Supabase client for middleware
+  const { supabase, response: supabaseResponse } = createMiddlewareClient(request);
+  
+  // Refresh session if it exists
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  // If user has a session, refresh it
+  if (session) {
+    await supabase.auth.refreshSession();
+  }
   
   // Handle API routes
   if (isApiRoute(pathname)) {
     // Add CORS headers for API routes
-    const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    const apiResponse = supabaseResponse || NextResponse.next();
+    apiResponse.headers.set('Access-Control-Allow-Origin', '*');
+    apiResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    apiResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     // Handle preflight requests
     if (request.method === 'OPTIONS') {
-      return new NextResponse(null, { status: 200, headers: response.headers });
+      return new NextResponse(null, { status: 200, headers: apiResponse.headers });
     }
     
     // Protect API routes that require authentication
@@ -35,14 +43,17 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith(route)
     );
     
-    if (isProtectedApiRoute && !token && !sessionId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (isProtectedApiRoute) {
+      const authenticated = await isAuthenticated(request);
+      if (!authenticated) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
     
-    return response;
+    return apiResponse;
   }
   
   // Handle protected routes
@@ -96,20 +107,20 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  // Add custom headers to all responses
-  const response = NextResponse.next();
+  // Add custom headers to all responses (use the response from Supabase client if available)
+  const finalResponse = supabaseResponse || NextResponse.next();
   
   // Security headers
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  finalResponse.headers.set('X-Content-Type-Options', 'nosniff');
+  finalResponse.headers.set('X-Frame-Options', 'DENY');
+  finalResponse.headers.set('X-XSS-Protection', '1; mode=block');
+  finalResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   
   // Add request metadata for logging
-  response.headers.set('X-Request-Path', pathname);
-  response.headers.set('X-Request-Method', request.method);
+  finalResponse.headers.set('X-Request-Path', pathname);
+  finalResponse.headers.set('X-Request-Method', request.method);
   
-  return response;
+  return finalResponse;
 }
 
 // Configure which routes the middleware should run on

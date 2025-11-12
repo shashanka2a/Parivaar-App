@@ -1,24 +1,17 @@
 import { NextRequest } from 'next/server';
 import { prisma } from './prisma';
+import { createMiddlewareClient } from './supabase-server';
 
 /**
- * Check if a user is authenticated based on request
+ * Check if a user is authenticated based on request using Supabase
  */
 export async function isAuthenticated(request: NextRequest): Promise<boolean> {
-  const token = request.cookies.get('auth-token')?.value;
-  const sessionId = request.cookies.get('session-id')?.value;
-  
-  if (!token && !sessionId) {
-    return false;
-  }
-  
-  // In a real implementation, you would verify the token/session with the database
-  // For now, we'll do a basic check
   try {
-    if (sessionId) {
-      // You could check session in database here
-      // const session = await prisma.session.findUnique({ where: { id: sessionId } });
-      // return session !== null && session.expiresAt > new Date();
+    const { supabase } = createMiddlewareClient(request);
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      return false;
     }
     
     return true;
@@ -29,21 +22,20 @@ export async function isAuthenticated(request: NextRequest): Promise<boolean> {
 }
 
 /**
- * Get user from request (if authenticated)
+ * Get user from request (if authenticated) using Supabase
  */
 export async function getUserFromRequest(request: NextRequest) {
-  const token = request.cookies.get('auth-token')?.value;
-  const sessionId = request.cookies.get('session-id')?.value;
-  const userId = request.cookies.get('user-id')?.value;
-  
-  if (!userId) {
-    return null;
-  }
-  
   try {
-    // Fetch user from database
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const { supabase } = createMiddlewareClient(request);
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      return null;
+    }
+    
+    // Fetch user from Prisma database (sync with Supabase auth)
+    const dbUser = await prisma.user.findUnique({
+      where: { email: user.email! },
       select: {
         id: true,
         name: true,
@@ -52,7 +44,24 @@ export async function getUserFromRequest(request: NextRequest) {
       },
     });
     
-    return user;
+    // If user exists in Supabase auth but not in our DB, create them
+    if (!dbUser && user.email) {
+      const newUser = await prisma.user.create({
+        data: {
+          email: user.email,
+          name: user.user_metadata?.name || user.email.split('@')[0],
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          createdAt: true,
+        },
+      });
+      return newUser;
+    }
+    
+    return dbUser;
   } catch (error) {
     console.error('Failed to fetch user:', error);
     return null;

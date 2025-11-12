@@ -43,9 +43,22 @@ npm install prisma @prisma/client
 ```
 
 ### 2. Configure Database
-Create a `.env` file in the root directory:
+Create a `.env.local` file in the root directory with your Supabase connection string:
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/parivaar?schema=public"
+# Supabase PostgreSQL Connection
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://frxpbnoornbecjutllfv.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NDU4MDcsImV4cCI6MjA3ODUyMTgwN30.9D8gIrXT1PLeQ3Rtm6W3LulAMCaadz-XbRttbGQQGEo
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0NTgwNywiZXhwIjoyMDc4NTIxODA3fQ.wyfgKupWKjivBqjVl53kS5tiy1eenwhaeq6fp9bm614
+```
+
+**Note**: Replace `[YOUR-PASSWORD]` with your Supabase database password. Get it from Supabase Dashboard > Settings > Database.
+
+For migrations, you may need to use the direct connection (without pgbouncer):
+```env
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
 ```
 
 ### 3. Generate Prisma Client
@@ -138,6 +151,8 @@ Currently, the middleware checks for cookies (`auth-token`, `session-id`). To im
 - Prisma client uses connection pooling in production
 - In development, Prisma logs all queries for debugging
 - Security headers are added to all responses automatically
+- **Supabase Integration**: Authentication is handled by Supabase, while Prisma manages application data
+- Users authenticated via Supabase are automatically synced to the Prisma `User` table
 
 ## Next Steps
 
