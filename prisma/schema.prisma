@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  familyTrees FamilyTree[]
+  
+  @@map("users")
+}
+
+model FamilyTree {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  theme       String   @default("modern")
+  rootPersonId String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persons  Person[]
+  shares   Share[]
+  
+  @@map("family_trees")
+}
+
+model Person {
+  id          String   @id @default(cuid())
+  name        String
+  relation    String
+  birthYear   String?
+  deathYear   String?
+  gender      String   // 'male' | 'female' | 'other'
+  photo       String?
+  notes       String?
+  parentId    String?
+  spouseId    String?
+  generation  Int      @default(0)
+  
+  // Detailed fields
+  biography   String?  @db.Text
+  dateOfBirth String?
+  birthPlace  String?
+  nakshatram  String?
+  moolaPadam  String?
+  rasi        String?
+  height      String?
+  weight      String?
+  bloodGroup  String?
+  complexion  String?
+  marriageDate String?
+  
+  // JSON fields for complex data
+  timeline    Json?    // Array<{ year: string; event: string }>
+  gallery     Json?    // string[]
+  documents   Json?    // Array<{ name: string; type: string; url: string }>
+  education   Json?    // Array<{ level: string; institution: string; year: string; status: string }>
+  career      Json?    // Array<{ title: string; company: string; period: string; achievements?: string }>
+  contact     Json?    // { phone?: string; email?: string; address?: string; city?: string; state?: string; country?: string }
+  
+  familyTreeId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  familyTree FamilyTree @relation(fields: [familyTreeId], references: [id], onDelete: Cascade)
+  
+  @@map("persons")
+  @@index([familyTreeId])
+  @@index([parentId])
+  @@index([spouseId])
+}
+
+model Share {
+  id          String     @id @default(cuid())
+  shareId     String     @unique
+  familyTreeId String
+  isActive    Boolean    @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime   @default(now())
+  
+  familyTree FamilyTree @relation(fields: [familyTreeId], references: [id], onDelete: Cascade)
+  
+  @@map("shares")
+  @@index([shareId])
+}
