@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://frxpbnoornbecjutllfv.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NDU4MDcsImV4cCI6MjA3ODUyMTgwN30.9D8gIrXT1PLeQ3Rtm6W3LulAMCaadz-XbRttbGQQGEo';
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0NTgwNywiZXhwIjoyMDc4NTIxODA3fQ.wyfgKupWKjivBqjVl53kS5tiy1eenwhaeq6fp9bm614';
+// Supabase configuration - loaded from environment variables
+// Never expose these values in client-side code or commit them to git
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env file');
+}
 
 // Client-side Supabase client (for browser usage)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

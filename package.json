@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:push:supabase": "node push-schema.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -41,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.11.17",
     "html2canvas": "^1.4.1",
