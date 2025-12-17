@@ -21,12 +21,30 @@ export default function TreesPage() {
   }
 
   const handleSelectTree = (treeId: string, treeName: string) => {
+    let loadedFamilyTree = [];
+    let loadedFamilyName: string | undefined = undefined;
+
+    if (typeof window !== 'undefined') {
+      const treeData = localStorage.getItem(`parivaar-tree-${treeId}`);
+      if (treeData) {
+        try {
+          const parsed = JSON.parse(treeData);
+          loadedFamilyTree = parsed.familyTree || [];
+          loadedFamilyName = parsed.familyName;
+        } catch {
+          // If parsing fails, fall back to an empty tree
+          loadedFamilyTree = [];
+        }
+      }
+    }
+
     setAppState(prev => ({
       ...prev,
       currentTreeId: treeId,
-      familyName: treeName,
-      familyTree: [],
+      familyName: loadedFamilyName || treeName,
+      familyTree: loadedFamilyTree,
     }));
+
     router.push('/dashboard');
   };
 

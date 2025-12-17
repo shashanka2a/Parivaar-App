@@ -195,7 +195,10 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <Card className="p-6 bg-white border-[#D9D5CE] shadow-sm hover:shadow-md transition-shadow group">
+                  <Card
+                    className="p-6 bg-white border-[#D9D5CE] shadow-sm hover:shadow-md transition-shadow group cursor-pointer"
+                    onClick={() => onSelectTree(tree.id, tree.name)}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="p-3 bg-[#4CAF50]/10 rounded-xl">
                         <TreePine className="size-6 text-[#3D5A3A]" />
@@ -247,7 +250,10 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
                     </div>
 
                     <Button
-                      onClick={() => onSelectTree(tree.id, tree.name)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectTree(tree.id, tree.name);
+                      }}
                       className="w-full bg-[#4CAF50] hover:bg-[#3D9141] text-white shadow-sm"
                     >
                       Open Tree
@@ -255,7 +261,10 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
                     </Button>
 
                     <Button
-                      onClick={() => handleShareTree(tree)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShareTree(tree);
+                      }}
                       className="w-full bg-[#4CAF50] hover:bg-[#3D9141] text-white shadow-sm mt-2"
                     >
                       Share Tree
