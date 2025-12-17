@@ -36,5 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
+# generated
 /src/generated/prisma
+
+# documentation build (if any)
+docs/_build/
+docs/.vuepress/dist/

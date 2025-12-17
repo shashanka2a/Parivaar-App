@@ -52,6 +52,18 @@ npm start
 ## Project Structure
 
 ```
+├── docs/                 # Documentation files
+│   ├── PRISMA_SETUP.md   # Prisma database setup
+│   ├── SUPABASE_SETUP.md # Supabase integration
+│   ├── AUTH_TESTING.md   # Authentication testing
+│   └── ...              # Other documentation
+├── scripts/              # Utility scripts
+│   ├── push-schema.js   # Push Prisma schema
+│   └── push-schema.sh   # Bash version
+├── tests/                # Test scripts
+│   ├── test-connection.js # Connection tests
+│   ├── test-auth.sh      # Auth flow tests
+│   └── test-flow.sh      # Routing tests
 ├── src/
 │   ├── app/              # Next.js App Router pages
 │   │   ├── layout.tsx    # Root layout with metadata
@@ -60,13 +72,22 @@ npm start
 │   │   ├── trees/        # Family trees manager
 │   │   ├── dashboard/    # Main dashboard
 │   │   ├── explore/      # Explore family members
-│   │   └── settings/      # Settings page
-│   ├── components/      # React components
+│   │   ├── settings/     # Settings page
+│   │   └── api/          # API routes
+│   │       ├── auth/     # Authentication endpoints
+│   │       └── test-*    # Test endpoints
+│   ├── components/       # React components
 │   │   ├── ui/          # UI components (shadcn/ui)
 │   │   └── ...          # Feature components
 │   ├── lib/             # Utilities and context
-│   │   └── state-context.tsx  # Global state management
+│   │   ├── prisma.ts    # Prisma client
+│   │   ├── supabase.ts  # Supabase client
+│   │   ├── middleware-utils.ts # Middleware helpers
+│   │   └── state-context.tsx # Global state
+│   ├── middleware.ts    # Next.js middleware
 │   └── styles/          # Global styles
+├── prisma/              # Prisma schema
+│   └── schema.prisma    # Database schema
 ├── next.config.ts       # Next.js configuration
 ├── tailwind.config.ts   # Tailwind CSS configuration
 └── tsconfig.json        # TypeScript configuration
@@ -98,6 +119,17 @@ npm start
 - Navigation uses Next.js `useRouter` from `next/navigation`
 - Animations use Framer Motion (replaced from `motion/react`)
 - All imports use path aliases (`@/components`, `@/lib`)
+
+## Documentation
+
+- **[Setup Guides](./docs/)** - Database and Supabase setup
+- **[Testing Guides](./docs/)** - How to test the application
+- **[Architecture](./docs/)** - Application flow and routing
+
+## Scripts
+
+- **[Database Scripts](./scripts/)** - Prisma schema management
+- **[Test Scripts](./tests/)** - Automated testing utilities
 
 ## License
 
