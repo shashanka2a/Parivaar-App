@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TreePine, Mail, User, Users2, UserCircle2, Lock, Phone } from 'lucide-react';
 import { Button } from './ui/button';
@@ -25,6 +25,24 @@ export default function OnboardingFlow({ setAppState }: Props) {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [familyName, setFamilyName] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering (prevents hydration issues)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading state until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#F5F3EF] flex items-center justify-center">
+        <div className="text-center">
+          <TreePine className="size-12 text-[#3D5A3A] mx-auto mb-4 animate-pulse" />
+          <p className="text-[#5A6B57]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

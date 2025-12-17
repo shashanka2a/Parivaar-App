@@ -11,10 +11,24 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Client-side Supabase client (for browser usage) - uses cookies to sync with server
 // This ensures that server-side API routes can read the session
 export function createClient() {
-  return createBrowserClient(
-    supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseAnonKey || 'placeholder-key'
-  );
+  // Validate environment variables
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('⚠️ Supabase environment variables not set. Using placeholder values.');
+  }
+  
+  try {
+    return createBrowserClient(
+      supabaseUrl || 'https://placeholder.supabase.co',
+      supabaseAnonKey || 'placeholder-key'
+    );
+  } catch (error) {
+    console.error('❌ Failed to create Supabase client:', error);
+    // Return a client with placeholder values to prevent crashes
+    return createBrowserClient(
+      'https://placeholder.supabase.co',
+      'placeholder-key'
+    );
+  }
 }
 
 // Export a singleton instance for convenience
