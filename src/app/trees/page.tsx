@@ -20,32 +20,43 @@ export default function TreesPage() {
     return null;
   }
 
-  const handleSelectTree = (treeId: string, treeName: string) => {
-    let loadedFamilyTree = [];
-    let loadedFamilyName: string | undefined = undefined;
+  const handleSelectTree = async (treeId: string, treeName: string) => {
+    try {
+      const res = await fetch(`/api/trees/${treeId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-    if (typeof window !== 'undefined') {
-      const treeData = localStorage.getItem(`parivaar-tree-${treeId}`);
-      if (treeData) {
-        try {
-          const parsed = JSON.parse(treeData);
-          loadedFamilyTree = parsed.familyTree || [];
-          loadedFamilyName = parsed.familyName;
-        } catch {
-          // If parsing fails, fall back to an empty tree
-          loadedFamilyTree = [];
+      let loadedFamilyTree = [];
+      let loadedFamilyName: string | undefined = treeName;
+
+      if (res.ok) {
+        const data = await res.json();
+        loadedFamilyTree = Array.isArray(data.persons) ? data.persons : [];
+        if (typeof data.name === 'string' && data.name.trim()) {
+          loadedFamilyName = data.name;
         }
       }
+
+      setAppState(prev => ({
+        ...prev,
+        currentTreeId: treeId,
+        familyName: loadedFamilyName,
+        familyTree: loadedFamilyTree,
+      }));
+
+      router.push('/dashboard');
+    } catch (error) {
+      // If API call fails, still navigate with minimal state so user isn't blocked
+      console.error('Failed to load tree from API, continuing with empty tree:', error);
+      setAppState(prev => ({
+        ...prev,
+        currentTreeId: treeId,
+        familyName: treeName,
+        familyTree: [],
+      }));
+      router.push('/dashboard');
     }
-
-    setAppState(prev => ({
-      ...prev,
-      currentTreeId: treeId,
-      familyName: loadedFamilyName || treeName,
-      familyTree: loadedFamilyTree,
-    }));
-
-    router.push('/dashboard');
   };
 
   const handleLogout = () => {

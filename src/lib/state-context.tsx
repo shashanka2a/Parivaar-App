@@ -132,38 +132,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
   }, [appState.currentTreeId]);
 
-  // Save tree data separately
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    if (appState.currentTreeId && appState.familyTree.length >= 0) {
-      // Persist a lightweight version of the tree without large binary fields (photos, galleries, documents)
-      const lightweightTree = appState.familyTree.map(serializePersonForStorage);
-
-      localStorage.setItem(
-        `parivaar-tree-${appState.currentTreeId}`,
-        JSON.stringify({
-          familyTree: lightweightTree,
-          familyName: appState.familyName,
-        }),
-      );
-      
-      // Update tree metadata
-      const trees = JSON.parse(localStorage.getItem('parivaar-trees') || '[]');
-      const updatedTrees = trees.map((tree: any) => {
-        if (tree.id === appState.currentTreeId) {
-          return {
-            ...tree,
-            memberCount: appState.familyTree.length,
-            lastModified: new Date().toISOString(),
-          };
-        }
-        return tree;
-      });
-      localStorage.setItem('parivaar-trees', JSON.stringify(updatedTrees));
-    }
-  }, [appState.familyTree, appState.familyName, appState.currentTreeId]);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
     // Avoid storing full familyTree (with photos) in the global snapshot.

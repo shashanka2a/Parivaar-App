@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { TreePine, Plus, Users, Trash2, LogOut, ArrowRight, Share2 } from 'lucide-react';
@@ -38,48 +38,96 @@ interface Props {
 
 export default function FamilyTreesManager({ userName, onSelectTree, onLogout }: Props) {
   const router = useRouter();
-  const [trees, setTrees] = useState<FamilyTree[]>(() => {
-    const saved = localStorage.getItem('parivaar-trees');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [trees, setTrees] = useState<FamilyTree[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTreeName, setNewTreeName] = useState('');
 
-  const handleCreateTree = () => {
+  useEffect(() => {
+    const loadTrees = async () => {
+      try {
+        const res = await fetch('/api/trees', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to load trees');
+        const data = await res.json();
+        setTrees(
+          (data.trees || []).map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            memberCount: t.memberCount ?? 0,
+            createdAt: t.createdAt,
+            lastModified: t.lastModified,
+          })),
+        );
+      } catch (error) {
+        console.error('Failed to load trees:', error);
+      }
+    };
+
+    loadTrees();
+  }, []);
+
+  const handleCreateTree = async () => {
     if (!newTreeName.trim()) {
       toast.error('Please enter a family name');
       return;
     }
 
-    const newTree: FamilyTree = {
-      id: `tree-${Date.now()}`,
-      name: newTreeName,
-      memberCount: 0,
-      createdAt: new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch('/api/trees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name: newTreeName }),
+      });
 
-    const updatedTrees = [...trees, newTree];
-    setTrees(updatedTrees);
-    localStorage.setItem('parivaar-trees', JSON.stringify(updatedTrees));
-    
-    toast.success(`${newTreeName} family tree created!`);
-    setIsCreateModalOpen(false);
-    setNewTreeName('');
-    
-    // Select the newly created tree
-    onSelectTree(newTree.id, newTree.name);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to create tree');
+      }
+
+      const created = await res.json();
+
+      const newTree: FamilyTree = {
+        id: created.id,
+        name: created.name,
+        memberCount: created.memberCount ?? 0,
+        createdAt: created.createdAt,
+        lastModified: created.lastModified,
+      };
+
+      setTrees(prev => [newTree, ...prev]);
+
+      toast.success(`${newTreeName} family tree created!`);
+      setIsCreateModalOpen(false);
+      setNewTreeName('');
+
+      // Select the newly created tree
+      onSelectTree(newTree.id, newTree.name);
+    } catch (error: any) {
+      console.error('Create tree failed:', error);
+      toast.error(error.message || 'Failed to create tree');
+    }
   };
 
-  const handleDeleteTree = (treeId: string, treeName: string) => {
-    const updatedTrees = trees.filter(t => t.id !== treeId);
-    setTrees(updatedTrees);
-    localStorage.setItem('parivaar-trees', JSON.stringify(updatedTrees));
-    
-    // Also delete the tree data
-    localStorage.removeItem(`parivaar-tree-${treeId}`);
-    
-    toast.success(`${treeName} family tree deleted`);
+  const handleDeleteTree = async (treeId: string, treeName: string) => {
+    try {
+      const res = await fetch(`/api/trees/${treeId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to delete tree');
+      }
+
+      const updatedTrees = trees.filter(t => t.id !== treeId);
+      setTrees(updatedTrees);
+
+      toast.success(`${treeName} family tree deleted`);
+    } catch (error: any) {
+      console.error('Delete tree failed:', error);
+      toast.error(error.message || 'Failed to delete tree');
+    }
   };
 
   const formatDate = (dateString: string) => {
