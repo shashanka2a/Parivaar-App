@@ -198,7 +198,7 @@ User logs in
 Redirected back to /dashboard
 ```
 
-## Route Protection Logic
+## Route Protection Logic (Updated)
 
 ### Code Flow
 
@@ -208,17 +208,17 @@ if (isPublicRoute(pathname)) {
   return NextResponse.next(); // Allow access
 }
 
-// 2. Try to create Supabase client
+// 2. Try to create Supabase client (server-side)
 try {
   const { supabase } = createMiddlewareClient(request);
-  // Check session, refresh if needed
+  // Middleware can refresh session if needed
 } catch (error) {
-  // If env vars missing, continue without auth
+  // If env vars missing, continue without auth for public routes only
 }
 
 // 3. Check if protected route
 if (isProtectedRoute(pathname)) {
-  const authenticated = await isAuthenticated(request);
+  const authenticated = await isAuthenticated(request); // uses supabase.auth.getUser()
   if (!authenticated) {
     // Redirect to onboarding
   }
@@ -261,21 +261,19 @@ curl -I https://www.parivaar.world/dashboard
 # Expected: 302 Redirect to /onboarding
 ```
 
-### Test 3: Signup Flow
-```bash
-curl -X POST https://www.parivaar.world/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
-# Expected: 201 Created, returns user + session
-```
+### Test 3: Signup & Login Flow (UI‑driven)
 
-### Test 4: Login Flow
+Signup/Login are now handled by the **client Supabase SDK**:
+
+1. Open `/onboarding`.
+2. Use the **Sign Up** tab → `supabase.auth.signUp(...)` is called.
+3. Use the **Login** tab → `supabase.auth.signInWithPassword(...)` is called.
+4. After success, you are redirected to `/trees`.
+
+To confirm the session on the server, call:
+
 ```bash
-curl -X POST https://www.parivaar.world/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}' \
-  -c cookies.txt
-# Expected: 200 OK, sets cookies
+curl https://www.parivaar.world/api/auth/me  # should return 200 and user info when logged in
 ```
 
 ### Test 5: Protected Route With Auth

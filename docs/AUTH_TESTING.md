@@ -10,60 +10,64 @@ Required variables:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `DATABASE_URL`
 
-## Authentication Endpoints
+## Current Authentication Flow (MVP)
 
-### 1. Signup
-**POST** `/api/auth/signup`
+### 1. Client‑side auth (Supabase JS SDK)
 
-Request body:
-```json
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "User Name" // optional
-}
+For the MVP, the **onboarding UI talks directly to Supabase Auth** using the browser SDK.  
+There are **no `/api/auth/signup` / `/api/auth/login` wrappers in the flow anymore.**
+
+In `OnboardingFlow`:
+
+- **Signup:**
+
+```ts
+const { data, error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: { data: { name } },
+});
 ```
 
-Response (201):
-```json
-{
-  "message": "User created successfully",
-  "user": {
-    "id": "user-id",
-    "email": "user@example.com",
-    "name": "User Name"
-  },
-  "session": { ... }
-}
+- **Login:**
+
+```ts
+const { data, error } = await supabase.auth.signInWithPassword({
+  email,
+  password,
+});
 ```
 
-### 2. Login
-**POST** `/api/auth/login`
+On success:
 
-Request body:
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
+- Supabase sets the **session cookies** in the browser.
+- We update `appState.user` from `data.user` and continue onboarding.
+
+### 2. Server‑side auth usage
+
+All server routes that need auth use the **same pattern as `/api/auth/me`**:
+
+```ts
+const supabase = await createClient();
+const { data: { user } } = await supabase.auth.getUser();
+if (!user || !user.email) return 401;
 ```
 
-Response (200):
-```json
-{
-  "message": "Login successful",
-  "user": {
-    "id": "user-id",
-    "email": "user@example.com",
-    "name": "User Name"
-  },
-  "session": {
-    "access_token": "...",
-    "refresh_token": "...",
-    "expires_at": 1234567890
-  }
-}
-```
+These routes are:
+
+- `GET /api/trees`
+- `POST /api/trees`
+- `GET /api/trees/[id]`
+- `PUT /api/trees/[id]`
+- `DELETE /api/trees/[id]`
+- `POST /api/shares`
+- `GET /api/auth/me`
+
+They all:
+
+- Read the Supabase session from cookies.
+- Resolve the corresponding `User` row in Prisma by email.
+- Enforce **tree ownership** where relevant (trees & share links).
 
 ### 3. Get Current User
 **GET** `/api/auth/me`
@@ -97,56 +101,29 @@ Response (200):
 
 ## Testing Methods
 
-### Method 1: Automated Test Script
+### Manual Testing (MVP)
+
+Because signup/login use the browser SDK, testing is done via the **UI**:
+
+1. Open `/` → you’ll be redirected to `/onboarding`.
+2. Use the **Sign Up** tab:
+   - Enter name, email, password (≥ 6 chars).
+   - On success, you move to the family‑name step.
+3. Or use the **Login** tab:
+   - Enter existing credentials.
+4. After onboarding, you land on `/trees` and should see your trees.
+
+To verify server‑side auth:
+
+1. After logging in in the browser, open devtools → Network.
+2. Hit:
+
 ```bash
-./test-auth.sh
+GET /api/auth/me       # should return 200, with your user + familyTrees
+GET /api/trees         # should return trees for that user
 ```
 
-This script will:
-1. Test signup with a unique email
-2. Test login with the created credentials
-3. Test getting current user
-4. Test logout
-
-### Method 2: Manual Testing with curl
-
-**Signup:**
-```bash
-curl -X POST http://localhost:3000/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
-```
-
-**Login:**
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}' \
-  -c cookies.txt
-```
-
-**Get Current User:**
-```bash
-curl -X GET http://localhost:3000/api/auth/me \
-  -b cookies.txt
-```
-
-**Logout:**
-```bash
-curl -X POST http://localhost:3000/api/auth/logout \
-  -b cookies.txt
-```
-
-### Method 3: Test Auth Flow Endpoint
-```bash
-curl http://localhost:3000/api/test-auth-flow
-```
-
-This endpoint tests:
-- Environment variables
-- Supabase connection
-- Database connection
-- Provides instructions for manual testing
+If these return 401, it means the Supabase session cookie isn’t present; in practice, with the client SDK this should work as long as `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are correct.
 
 ## Validation Checklist
 
@@ -178,7 +155,7 @@ This endpoint tests:
 
 ### "User already exists"
 - Email must be unique
-- Try a different email or login instead
+- Try a different email or use the **Login** tab instead
 
 ### "Invalid email or password"
 - Check email format

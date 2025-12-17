@@ -229,21 +229,38 @@ try {
 
 **Solution:** Removed `isValidShareLink()` from middleware, validation moved to page components.
 
-## 📊 Current Status
+## 📊 Current Status (MVP)
 
-✅ **Working:**
-- Public routes load without env vars
-- Protected routes redirect properly
-- Authentication flow works
-- Session management works
-- Security headers applied
-- Error handling in place
+✅ **Working end‑to‑end:**
 
-✅ **Tested:**
-- Build compiles successfully
-- All routes accessible
-- API endpoints respond
-- Middleware doesn't crash
+- **Auth & Users**
+  - Onboarding uses **Supabase JS client** for email/password signup & login.
+  - Supabase session cookies are set in the browser.
+  - Server routes use `createClient() + supabase.auth.getUser()` (same as `/api/auth/me`).
+  - Prisma `User` table is synced from Supabase user (email + name).
+
+- **Trees**
+  - `GET /api/trees` and `POST /api/trees` return/create `FamilyTree` rows for the authenticated user.
+  - `/trees` screen loads trees from `/api/trees` (no localStorage).
+  - Selecting a tree calls `GET /api/trees/[id]` to load `Person` rows into `appState.familyTree`, then navigates to `/dashboard`.
+  - Tree changes (people edits) are kept in memory for now; a `PUT /api/trees/[id]` sync path exists but is not yet wired from the UI (post‑MVP).
+
+- **Sharing**
+  - `POST /api/shares` creates a `Share` row tied to the owner’s `FamilyTree`.
+  - `GET /api/shares/[shareId]` returns the tree + persons from the DB.
+  - “Share Tree” / “Share” in the dashboard calls `/api/shares` and copies `/shared/{shareId}` to the clipboard.
+  - `/shared/[shareId]` uses `SharedTreeView` to fetch via `/api/shares/[shareId]` and render a **read‑only** tree.
+
+- **Middleware & Security**
+  - Public routes (`/`, `/onboarding`, shared links, static assets) bypass auth.
+  - Protected app routes (`/dashboard`, `/trees`, `/explore`, `/settings`, `/api/*` where required) check auth via middleware helpers.
+  - Security headers and basic CORS for API routes remain in place.
+
+✅ **Technical health:**
+
+- `npm run build` passes (Next.js 16 + TypeScript).
+- Prisma schema (`User`, `FamilyTree`, `Person`, `Share`) is in sync with Supabase Postgres.
+- Supabase env vars are loaded from `.env` and not committed.
 
 ## 🚀 Deployment Checklist
 
