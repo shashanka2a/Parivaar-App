@@ -176,12 +176,33 @@ export async function GET(request: Request) {
 
 4. **Environment Variables**: Use `.env.local` for local development and set environment variables in your deployment platform (Vercel, etc.).
 
+## Disable Email Confirmation (Required for MVP)
+
+To allow users to sign up and immediately access the app without email verification:
+
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project: `frxpbnoornbecjutllfv`
+3. Navigate to **Authentication** → **Providers**
+4. Click on **Email** provider
+5. Find the **Confirm Email** toggle
+6. **Turn it OFF**
+7. Click **Save**
+
+**Why this is needed:**
+- By default, Supabase requires email confirmation before creating a session
+- With email confirmation enabled, `signUp()` returns a user but no session
+- Disabling it allows immediate session creation after signup
+- Users can sign up and start using the app right away
+
+**Security Note:** Disabling email confirmation means users can sign up with unverified emails. For production, consider re-enabling it or implementing alternative verification methods.
+
 ## Next Steps
 
-1. Set up Row Level Security (RLS) policies in Supabase
-2. Configure authentication providers (email, OAuth, etc.) in Supabase Dashboard
-3. Create API routes that use both Supabase auth and Prisma
-4. Set up database backups in Supabase Dashboard
+1. ✅ **Disable email confirmation** (see above)
+2. Set up Row Level Security (RLS) policies in Supabase
+3. Configure authentication providers (email, OAuth, etc.) in Supabase Dashboard
+4. Create API routes that use both Supabase auth and Prisma
+5. Set up database backups in Supabase Dashboard
 
 ## Troubleshooting
 

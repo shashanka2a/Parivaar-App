@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Supabase configuration - loaded from environment variables
@@ -7,21 +8,24 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Client-side Supabase client (for browser usage)
-// Use empty strings as fallback to avoid build-time errors
-// Actual validation happens at runtime
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder-key', {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+// Client-side Supabase client (for browser usage) - uses cookies to sync with server
+// This ensures that server-side API routes can read the session
+export function createClient() {
+  return createBrowserClient(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key'
+  );
+}
+
+// Export a singleton instance for convenience
+export const supabase = createClient();
 
 // Server-side Supabase client with service role (for admin operations)
 // Only create if service role key is available
-export const supabaseAdmin = supabaseServiceRoleKey
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+// Note: This uses @supabase/supabase-js directly since it's server-side only
+
+export const supabaseAdmin = supabaseServiceRoleKey && supabaseUrl
+  ? createSupabaseClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,

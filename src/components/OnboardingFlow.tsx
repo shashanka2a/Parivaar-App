@@ -48,6 +48,18 @@ export default function OnboardingFlow({ setAppState }: Props) {
           return;
         }
 
+        // Check if email confirmation is required
+        if (data.user && !data.session) {
+          toast.info('Please check your email to confirm your account before continuing.');
+          return;
+        }
+
+        // Verify session is established
+        if (!data.session) {
+          toast.error('Session not established. Please try again.');
+          return;
+        }
+
         const user = data.user;
         const userName = user?.user_metadata?.name || name || user?.email?.split('@')[0] || '';
         const userEmail = user?.email || email;
@@ -56,6 +68,17 @@ export default function OnboardingFlow({ setAppState }: Props) {
           ...prev,
           user: { name: userName, email: userEmail },
         }));
+
+        // Wait a moment for cookies to be set and verify session
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Verify session is accessible
+        const { data: { session: verifySession } } = await supabase.auth.getSession();
+        if (!verifySession) {
+          console.error('Session not found after signup');
+          toast.error('Session not established. Please check your email for confirmation or try logging in.');
+          return;
+        }
 
         toast.success('Account created successfully');
         setStep('familyName');
@@ -72,6 +95,12 @@ export default function OnboardingFlow({ setAppState }: Props) {
           return;
         }
 
+        // Verify session is established
+        if (!data.session || !data.user) {
+          toast.error('Login failed. Please try again.');
+          return;
+        }
+
         const user = data.user;
         const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
         const userEmail = user?.email || email;
@@ -81,12 +110,23 @@ export default function OnboardingFlow({ setAppState }: Props) {
           user: { name: userName, email: userEmail },
         }));
 
+        // Wait a moment for cookies to be set and verify session
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Verify session is accessible
+        const { data: { session: verifySession } } = await supabase.auth.getSession();
+        if (!verifySession) {
+          console.error('Session not found after login');
+          toast.error('Session not established. Please try again.');
+          return;
+        }
+
         toast.success('Logged in successfully');
         setStep('familyName');
       }
     } catch (err: any) {
       console.error('Onboarding auth error:', err);
-      toast.error('Something went wrong. Please try again.');
+      toast.error(err.message || 'Something went wrong. Please try again.');
     }
   };
 
