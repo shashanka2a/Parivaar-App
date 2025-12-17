@@ -37,10 +37,11 @@ async function requireOwnTree(treeId: string) {
 // GET /api/trees/:id - load full tree with persons
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const tree = await requireOwnTree(params.id);
+    const { id } = await context.params;
+    const tree = await requireOwnTree(id);
 
     return NextResponse.json(
       {
@@ -65,10 +66,11 @@ export async function GET(
 // PUT /api/trees/:id - replace persons array (simple sync)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const tree = await requireOwnTree(params.id);
+    const { id } = await context.params;
+    const tree = await requireOwnTree(id);
     const body = await request.json();
     const incomingPersons = Array.isArray(body.persons) ? body.persons : [];
     const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim() : tree.name;
@@ -143,10 +145,11 @@ export async function PUT(
 // DELETE /api/trees/:id - delete tree and related persons/shares
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const tree = await requireOwnTree(params.id);
+    const { id } = await context.params;
+    const tree = await requireOwnTree(id);
 
     await prisma.familyTree.delete({
       where: { id: tree.id },

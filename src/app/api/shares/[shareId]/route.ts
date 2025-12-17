@@ -6,11 +6,13 @@ export const runtime = 'nodejs';
 // GET /api/shares/:shareId - public read-only access to a shared tree
 export async function GET(
   request: NextRequest,
-  { params }: { params: { shareId: string } },
+  context: { params: Promise<{ shareId: string }> },
 ) {
   try {
+    const { shareId } = await context.params;
+
     const share = await prisma.share.findUnique({
-      where: { shareId: params.shareId },
+      where: { shareId },
       include: {
         familyTree: {
           include: {

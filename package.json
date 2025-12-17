@@ -11,9 +11,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:push:supabase": "node scripts/push-schema.js",
-    "test:connection": "node tests/test-connection.js",
-    "test:auth": "./tests/test-auth.sh",
-    "test:flow": "./tests/test-flow.sh"
+    "test:mock-tree": "node scripts/seed-mock-tree.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
