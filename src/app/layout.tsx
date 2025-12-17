@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   description: 'Build and manage your family tree with Parivaar. Preserve your family history and legacy.',
   keywords: ['family tree', 'genealogy', 'family history', 'legacy'],
   authors: [{ name: 'Parivaar Team' }],
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
   openGraph: {
     title: 'Parivaar - Your Family, Your Legacy',
     description: 'Build and manage your family tree with Parivaar',
