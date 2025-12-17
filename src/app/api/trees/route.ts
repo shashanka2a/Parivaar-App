@@ -48,7 +48,21 @@ export async function GET() {
     return NextResponse.json({ trees }, { status: 200 });
   } catch (error: any) {
     console.error('GET /api/trees failed:', error);
-    return NextResponse.json({ error: error.message || 'Failed to load trees' }, { status: 500 });
+    console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+    
+    // Provide helpful error message
+    let errorMessage = error.message || 'Failed to load trees';
+    if (error.message?.includes("Can't reach database server")) {
+      errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? {
+        code: error.code,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+      } : undefined,
+    }, { status: 500 });
   }
 }
 
@@ -110,7 +124,21 @@ export async function POST(request: NextRequest) {
     );
   } catch (error: any) {
     console.error('POST /api/trees failed:', error);
-    return NextResponse.json({ error: error.message || 'Failed to create tree' }, { status: 500 });
+    console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+    
+    // Provide helpful error message
+    let errorMessage = error.message || 'Failed to create tree';
+    if (error.message?.includes("Can't reach database server")) {
+      errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? {
+        code: error.code,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+      } : undefined,
+    }, { status: 500 });
   }
 }
 
