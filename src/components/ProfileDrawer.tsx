@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit2, User, BookOpen, GraduationCap, Briefcase, MapPin, Phone, Image, FileText, Heart, Calendar, Ruler, Droplet, Users, Mail, Home, Star, Circle, Weight as WeightIcon, Activity, Pencil } from 'lucide-react';
+import { X, Edit2, User, BookOpen, GraduationCap, Briefcase, MapPin, Phone, Image, FileText, Heart, Calendar, Ruler, Droplet, Users, Mail, Home, Star, Circle, Weight as WeightIcon, Activity, Pencil, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card } from './ui/card';
@@ -9,6 +9,8 @@ import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 import { Person } from '@/lib/state-context';
 import { toast } from 'sonner';
+import { uploadProfileImage } from '@/lib/supabase';
+import { useAppState } from '@/lib/state-context';
 
 interface Props {
   open: boolean;
@@ -42,37 +44,45 @@ const formatDate = (dateString: string): string => {
 
 export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate }: Props) {
   if (!person) return null;
+  const { appState } = useAppState();
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && person) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
-        return;
+    if (!file || !person) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      toast.loading('Uploading profile photo...', { id: 'profile-photo-upload' });
+
+      const publicUrl = await uploadProfileImage(file, {
+        personId: person.id,
+        treeId: appState.currentTreeId,
+      });
+
+      const updatedPerson: Person = {
+        ...person,
+        photo: publicUrl,
+      };
+
+      if (onUpdate) {
+        onUpdate(updatedPerson);
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updatedPerson: Person = {
-          ...person,
-          photo: reader.result as string,
-        };
-        if (onUpdate) {
-          onUpdate(updatedPerson);
-          toast.success('Profile photo updated successfully!');
-        }
-      };
-      reader.onerror = () => {
-        toast.error('Failed to upload image. Please try again.');
-      };
-      reader.readAsDataURL(file);
+      toast.success('Profile photo updated successfully!', { id: 'profile-photo-upload' });
+    } catch (error: any) {
+      console.error('Profile photo upload failed:', error);
+      toast.error('Failed to upload image. Please try again.', { id: 'profile-photo-upload' });
     }
   };
 
@@ -89,17 +99,28 @@ export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate 
             className="fixed inset-0 bg-black/50 z-40"
           />
 
-          {/* Drawer */}
+          {/* Full-screen profile view */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 40 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50 overflow-y-auto"
+            className="fixed inset-0 h-full w-full bg-white shadow-2xl z-50 overflow-y-auto"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl">Profile Details</h2>
+            <div className="sticky top-0 bg-card border-b px-4 md:px-8 py-4 flex items-center justify-between z-10">
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={onClose}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <ArrowLeft className="size-4" />
+                  <span>Back</span>
+                </Button>
+                <h2 className="text-lg md:text-xl">Profile Details</h2>
+              </div>
               <div className="flex gap-2">
                 <Button
                   onClick={() => {
@@ -119,7 +140,7 @@ export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate 
             </div>
 
             {/* Profile Header */}
-            <div className="p-6 border-b bg-gradient-to-br from-[#E9F5E2] to-[#C7E9C0]/30">
+            <div className="px-4 md:px-8 py-6 border-b bg-gradient-to-br from-[#E9F5E2] to-[#C7E9C0]/30">
               <div className="flex flex-col items-center text-center">
                 <div className="relative group">
                   {person.photo ? (
@@ -156,42 +177,35 @@ export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate 
                     Born: {formatDate(person.dateOfBirth)}
                   </p>
                 )}
-                {(person.birthYear || person.deathYear) && !person.dateOfBirth && (
-                  <p className="text-sm text-muted-foreground">
-                    {person.birthYear && <span>{person.birthYear}</span>}
-                    {person.birthYear && person.deathYear && <span> - </span>}
-                    {person.deathYear && <span>{person.deathYear}</span>}
-                  </p>
-                )}
               </div>
             </div>
 
             {/* Tabs */}
-            <Tabs defaultValue="overview" className="p-4">
-              <TabsList className="grid w-full grid-cols-6 mb-6 h-auto p-1.5 gap-1.5">
+            <Tabs defaultValue="overview" className="p-4 md:p-6">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-6 h-auto p-1.5 gap-1.5">
                 <TabsTrigger value="overview" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <User className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Overview</span>
+                  <span className="truncate">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger value="personal" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Heart className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Personal</span>
+                  <span className="truncate">Personal</span>
                 </TabsTrigger>
                 <TabsTrigger value="education" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <GraduationCap className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Education</span>
+                  <span className="truncate">Education</span>
                 </TabsTrigger>
                 <TabsTrigger value="career" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Briefcase className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Career</span>
+                  <span className="truncate">Career</span>
                 </TabsTrigger>
                 <TabsTrigger value="contact" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <MapPin className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Contact</span>
+                  <span className="truncate">Contact</span>
                 </TabsTrigger>
                 <TabsTrigger value="media" className="py-2.5 px-2 md:px-4 gap-1 md:gap-2 min-w-0 justify-center">
                   <Image className="size-4 shrink-0" />
-                  <span className="hidden md:inline truncate">Media</span>
+                  <span className="truncate">Media</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -369,28 +383,6 @@ export default function ProfileDrawer({ open, onClose, person, onEdit, onUpdate 
                           <div className="flex-1">
                             <p className="text-xs text-gray-500">Marriage</p>
                             <p className="mt-1">{person.marriageDate}</p>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-                    {person.birthYear && !person.dateOfBirth && (
-                      <Card className="p-4">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="size-4 text-blue-500" />
-                          <div className="flex-1">
-                            <p className="text-xs text-gray-500">Birth Year</p>
-                            <p className="mt-1">{person.birthYear}</p>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-                    {person.deathYear && (
-                      <Card className="p-4">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="size-4 text-gray-500" />
-                          <div className="flex-1">
-                            <p className="text-xs text-gray-500">Death Year</p>
-                            <p className="mt-1">{person.deathYear}</p>
                           </div>
                         </div>
                       </Card>

@@ -8,7 +8,9 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Person } from '@/lib/state-context';
+import { Person, useAppState } from '@/lib/state-context';
+import { uploadProfileImage } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -23,8 +25,6 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
   const [formData, setFormData] = useState<Omit<Person, 'id'>>({
     name: '',
     relation: '',
-    birthYear: '',
-    deathYear: '',
     dateOfBirth: '',
     gender: 'other',
     photo: '',
@@ -54,8 +54,6 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
       setFormData({
         name: '',
         relation: '',
-        birthYear: '',
-        deathYear: '',
         dateOfBirth: '',
         gender: 'other',
         photo: '',
@@ -73,6 +71,8 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
     }
   }, [editingPerson, open]);
 
+  const { appState } = useAppState();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingPerson) {
@@ -83,14 +83,35 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
     onClose();
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, photo: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      toast.loading('Uploading photo...', { id: 'person-photo-upload' });
+
+      // Use a temporary id for new person (fall back to timestamp) or existing id when editing
+      const personId = editingPerson?.id || `temp-${Date.now()}`;
+      const publicUrl = await uploadProfileImage(file, {
+        personId,
+        treeId: appState.currentTreeId,
+      });
+
+      setFormData({ ...formData, photo: publicUrl });
+      toast.success('Photo uploaded successfully!', { id: 'person-photo-upload' });
+    } catch (error: any) {
+      console.error('Add person photo upload failed:', error);
+      toast.error('Failed to upload image. Please try again.', { id: 'person-photo-upload' });
     }
   };
 
@@ -220,29 +241,6 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
               />
             </div>
 
-            {/* Birth Year (for backward compatibility) */}
-            <div>
-              <Label htmlFor="birthYear" className="text-[#2C3E2A] mb-2">Birth Year (Optional)</Label>
-              <Input
-                id="birthYear"
-                value={formData.birthYear || ''}
-                onChange={(e) => setFormData({ ...formData, birthYear: e.target.value })}
-                placeholder="e.g., 1950"
-                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
-              />
-            </div>
-
-            {/* Death Year */}
-            <div>
-              <Label htmlFor="deathYear" className="text-[#2C3E2A] mb-2">Death Year</Label>
-              <Input
-                id="deathYear"
-                value={formData.deathYear || ''}
-                onChange={(e) => setFormData({ ...formData, deathYear: e.target.value })}
-                placeholder="e.g., 2020 (if applicable)"
-                className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2"
-              />
-            </div>
 
             {/* Location - City */}
             <div>
@@ -303,7 +301,7 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
 
             {/* Parent */}
             {familyTree.length > 0 && (
-              <div className="md:col-span-2">
+              <div>
                 <Label htmlFor="parent" className="text-[#2C3E2A] mb-2">Parent (Optional)</Label>
                 <Select
                   value={formData.parentId || 'none'}
@@ -321,6 +319,33 @@ export default function AddPersonModal({ open, onClose, onAdd, onUpdate, familyT
                         {person.name} ({person.relation})
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Spouse */}
+            {familyTree.length > 0 && (
+              <div>
+                <Label htmlFor="spouse" className="text-[#2C3E2A] mb-2">Spouse (Optional)</Label>
+                <Select
+                  value={formData.spouseId || 'none'}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, spouseId: value === 'none' ? undefined : value })
+                  }
+                >
+                  <SelectTrigger className="bg-white border-[#D9D5CE] text-[#2C3E2A] h-11 mt-2">
+                    <SelectValue placeholder="Select spouse" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#D9D5CE]">
+                    <SelectItem value="none" className="text-[#2C3E2A]">None</SelectItem>
+                    {familyTree
+                      .filter((person) => person.id !== editingPerson?.id && person.id !== formData.parentId)
+                      .map((person) => (
+                        <SelectItem key={person.id} value={person.id} className="text-[#2C3E2A]">
+                          {person.name} ({person.relation})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

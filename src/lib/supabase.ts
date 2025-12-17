@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // Supabase configuration - loaded from environment variables
 // Never expose these values in client-side code or commit them to git
@@ -31,6 +32,43 @@ export const supabaseAdmin = supabaseServiceRoleKey
 // Helper function to get Supabase client based on context
 export function getSupabaseClient(useAdmin = false) {
   return useAdmin ? supabaseAdmin : supabase;
+}
+
+// -------- Storage helpers --------
+
+/**
+ * Upload a profile image to Supabase Storage and return a public URL.
+ * Assumes you have created a public bucket named "avatars" in Supabase.
+ */
+export async function uploadProfileImage(
+  file: File,
+  options: { personId: string; treeId?: string },
+  client: SupabaseClient = supabase,
+): Promise<string> {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+  }
+
+  const bucket = 'avatars';
+  const ext = file.name.split('.').pop() || 'jpg';
+  const safeTreeId = options.treeId?.replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
+  const path = `${safeTreeId}/${options.personId}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await client.storage.from(bucket).upload(path, file, {
+    cacheControl: '3600',
+    upsert: true,
+  });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = client.storage.from(bucket).getPublicUrl(path);
+  if (!data?.publicUrl) {
+    throw new Error('Failed to get public URL for uploaded image.');
+  }
+
+  return data.publicUrl;
 }
 
 // Helper function to verify JWT token

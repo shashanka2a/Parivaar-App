@@ -68,6 +68,16 @@ interface AppStateContextType {
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
+// Strip large/binary fields before saving to localStorage to avoid quota issues
+function serializePersonForStorage(person: Person) {
+  // We intentionally drop photo/gallery/documents from localStorage snapshots.
+  // These can be re-hydrated from the backend later if needed.
+  // Keeping them in localStorage (base64) quickly exceeds browser quota.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { photo, gallery, documents, ...rest } = person;
+  return rest;
+}
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(() => {
     if (typeof window === 'undefined') {
@@ -78,7 +88,27 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       };
     }
     const saved = localStorage.getItem('parivaar-state');
-    return saved ? JSON.parse(saved) : {
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          user: parsed.user ?? null,
+          theme: parsed.theme ?? 'modern',
+          familyTree: parsed.familyTree ?? [],
+          rootPersonId: parsed.rootPersonId,
+          familyName: parsed.familyName,
+          currentTreeId: parsed.currentTreeId,
+        };
+      } catch {
+        // Fallback to a safe default if parsing fails
+        return {
+          user: null,
+          familyTree: [],
+          theme: 'modern',
+        };
+      }
+    }
+    return {
       user: null,
       familyTree: [],
       theme: 'modern',
@@ -107,10 +137,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
     
     if (appState.currentTreeId && appState.familyTree.length >= 0) {
-      localStorage.setItem(`parivaar-tree-${appState.currentTreeId}`, JSON.stringify({
-        familyTree: appState.familyTree,
-        familyName: appState.familyName,
-      }));
+      // Persist a lightweight version of the tree without large binary fields (photos, galleries, documents)
+      const lightweightTree = appState.familyTree.map(serializePersonForStorage);
+
+      localStorage.setItem(
+        `parivaar-tree-${appState.currentTreeId}`,
+        JSON.stringify({
+          familyTree: lightweightTree,
+          familyName: appState.familyName,
+        }),
+      );
       
       // Update tree metadata
       const trees = JSON.parse(localStorage.getItem('parivaar-trees') || '[]');
@@ -130,7 +166,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('parivaar-state', JSON.stringify(appState));
+    // Avoid storing full familyTree (with photos) in the global snapshot.
+    // Tree data is already stored in `parivaar-tree-*`.
+    const { familyTree, ...rest } = appState;
+    localStorage.setItem('parivaar-state', JSON.stringify(rest));
   }, [appState]);
 
   return (

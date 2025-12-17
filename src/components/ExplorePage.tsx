@@ -141,11 +141,9 @@ export default function ExplorePage({ appState }: Props) {
                     )}
                     <h3 className="mb-1">{person.name}</h3>
                     <p className="text-sm text-gray-600 mb-2">{person.relation}</p>
-                    {(person.birthYear || person.deathYear) && (
+                    {person.dateOfBirth && (
                       <p className="text-xs text-gray-500">
-                        {person.birthYear && <span>{person.birthYear}</span>}
-                        {person.birthYear && person.deathYear && <span> - </span>}
-                        {person.deathYear && <span>{person.deathYear}</span>}
+                        {new Date(person.dateOfBirth).getFullYear()}
                       </p>
                     )}
                     <div className="mt-2">
