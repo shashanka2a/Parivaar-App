@@ -125,80 +125,114 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Detailed Profile - {person?.name}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-[#F5F3EF] p-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
+          <DialogHeader className="flex-1">
+            <DialogTitle className="text-lg md:text-xl font-semibold">
+              Edit Detailed Profile<span className="text-sm text-muted-foreground font-normal"> – {person?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <Tabs defaultValue="biography" className="mt-4">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="biography">Story</TabsTrigger>
-              <TabsTrigger value="personal">Personal</TabsTrigger>
-              <TabsTrigger value="education">Education</TabsTrigger>
-              <TabsTrigger value="career">Career</TabsTrigger>
-              <TabsTrigger value="contact">Contact</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
+        <form onSubmit={handleSubmit} className="px-6 pb-6 pt-4">
+          <Tabs defaultValue="biography" className="mt-2">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-6 bg-[#F5F3EF] rounded-xl p-1 gap-1">
+              <TabsTrigger value="biography" className="rounded-lg py-2 text-sm font-medium">Story</TabsTrigger>
+              <TabsTrigger value="personal" className="rounded-lg py-2 text-sm font-medium">Personal</TabsTrigger>
+              <TabsTrigger value="education" className="rounded-lg py-2 text-sm font-medium">Education</TabsTrigger>
+              <TabsTrigger value="career" className="rounded-lg py-2 text-sm font-medium">Career</TabsTrigger>
+              <TabsTrigger value="contact" className="rounded-lg py-2 text-sm font-medium">Contact</TabsTrigger>
+              <TabsTrigger value="media" className="rounded-lg py-2 text-sm font-medium">Media</TabsTrigger>
             </TabsList>
 
             {/* Biography Tab */}
-            <TabsContent value="biography" className="space-y-4">
+            <TabsContent value="biography" className="space-y-6">
               <div>
-                <Label htmlFor="biography">Biography / Life Story</Label>
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase mb-2">
+                  Story
+                </p>
+                <Label htmlFor="biography" className="text-sm font-medium text-[#2C3E2A]">
+                  Biography / Life Story
+                </Label>
                 <Textarea
                   id="biography"
                   value={formData.biography || ''}
                   onChange={(e) => setFormData({ ...formData, biography: e.target.value })}
                   placeholder="Write about their life, achievements, personality, memorable moments..."
                   rows={8}
-                  className="mt-2"
+                  className="mt-2 bg-white border-[#E0DAD0]"
                 />
               </div>
 
               <div>
-                <Label htmlFor="notes">Additional Notes</Label>
+                <Label htmlFor="notes" className="text-sm font-medium text-[#2C3E2A]">
+                  Additional Notes
+                </Label>
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   placeholder="Any other information..."
                   rows={4}
-                  className="mt-2"
+                  className="mt-2 bg-white border-[#E0DAD0]"
                 />
               </div>
             </TabsContent>
 
             {/* Personal Details Tab */}
-            <TabsContent value="personal" className="space-y-6">
+            <TabsContent value="personal" className="space-y-8">
               {/* Astrological Details */}
               <div>
-                <h3 className="mb-4">Astrological Details</h3>
+                <div className="flex items-baseline justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-[#2C3E2A]">Astrological Details</h3>
+                  <p className="text-xs text-muted-foreground">Optional, for traditional records</p>
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="nakshatram">Nakshatram</Label>
+                    <Label htmlFor="nakshatram" className="text-xs font-medium text-[#4B5563]">
+                      Nakshatram
+                    </Label>
                     <Input
                       id="nakshatram"
                       value={formData.nakshatram || ''}
                       onChange={(e) => setFormData({ ...formData, nakshatram: e.target.value })}
                       placeholder="e.g., Ashwini"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="moolaPadam">Padam</Label>
+                    <Label htmlFor="moolaPadam" className="text-xs font-medium text-[#4B5563]">
+                      Padam
+                    </Label>
                     <Input
                       id="moolaPadam"
                       value={formData.moolaPadam || ''}
                       onChange={(e) => setFormData({ ...formData, moolaPadam: e.target.value })}
                       placeholder="e.g., 1st Padam"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="rasi">Rasi</Label>
+                    <Label htmlFor="rasi" className="text-xs font-medium text-[#4B5563]">
+                      Rasi
+                    </Label>
                     <Input
                       id="rasi"
                       value={formData.rasi || ''}
                       onChange={(e) => setFormData({ ...formData, rasi: e.target.value })}
                       placeholder="e.g., Mesha"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                 </div>
@@ -206,42 +240,54 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
 
               {/* Physical Attributes */}
               <div>
-                <h3 className="mb-4">Physical Attributes</h3>
+                <h3 className="mb-3 text-sm font-semibold text-[#2C3E2A]">Physical Attributes</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="height">Height</Label>
+                    <Label htmlFor="height" className="text-xs font-medium text-[#4B5563]">
+                      Height
+                    </Label>
                     <Input
                       id="height"
                       value={formData.height || ''}
                       onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                       placeholder="e.g., 5'8&quot;"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="weight">Weight</Label>
+                    <Label htmlFor="weight" className="text-xs font-medium text-[#4B5563]">
+                      Weight
+                    </Label>
                     <Input
                       id="weight"
                       value={formData.weight || ''}
                       onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                       placeholder="e.g., 70 kg"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="bloodGroup">Blood Group</Label>
+                    <Label htmlFor="bloodGroup" className="text-xs font-medium text-[#4B5563]">
+                      Blood Group
+                    </Label>
                     <Input
                       id="bloodGroup"
                       value={formData.bloodGroup || ''}
                       onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                       placeholder="e.g., O+"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="complexion">Complexion</Label>
+                    <Label htmlFor="complexion" className="text-xs font-medium text-[#4B5563]">
+                      Complexion
+                    </Label>
                     <Input
                       id="complexion"
                       value={formData.complexion || ''}
                       onChange={(e) => setFormData({ ...formData, complexion: e.target.value })}
                       placeholder="e.g., Fair, Wheatish"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                 </div>
@@ -249,33 +295,42 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
 
               {/* Important Dates */}
               <div>
-                <h3 className="mb-4">Important Dates</h3>
+                <h3 className="mb-3 text-sm font-semibold text-[#2C3E2A]">Important Dates</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Label htmlFor="dateOfBirth" className="text-xs font-medium text-[#4B5563]">
+                      Date of Birth
+                    </Label>
                     <Input
                       id="dateOfBirth"
                       type="date"
                       value={formData.dateOfBirth || ''}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="birthPlace">Birth Place</Label>
+                    <Label htmlFor="birthPlace" className="text-xs font-medium text-[#4B5563]">
+                      Birth Place
+                    </Label>
                     <Input
                       id="birthPlace"
                       value={formData.birthPlace || ''}
                       onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
                       placeholder="e.g., Mumbai, Maharashtra"
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="marriageDate">Marriage Date</Label>
+                    <Label htmlFor="marriageDate" className="text-xs font-medium text-[#4B5563]">
+                      Marriage Date
+                    </Label>
                     <Input
                       id="marriageDate"
                       type="date"
                       value={formData.marriageDate || ''}
                       onChange={(e) => setFormData({ ...formData, marriageDate: e.target.value })}
+                      className="mt-1 bg-white border-[#E0DAD0]"
                     />
                   </div>
                 </div>
@@ -283,9 +338,9 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
             </TabsContent>
 
             {/* Education Tab */}
-            <TabsContent value="education" className="space-y-4">
+            <TabsContent value="education" className="space-y-5">
               <div className="flex justify-between items-center">
-                <h3>Education History</h3>
+                <h3 className="text-sm font-semibold text-[#2C3E2A]">Education History</h3>
                 <Button type="button" onClick={addEducation} size="sm">
                   <Plus className="size-4 mr-2" />
                   Add Education
@@ -295,9 +350,9 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
               {formData.education && formData.education.length > 0 ? (
                 <div className="space-y-4">
                   {formData.education.map((edu, index) => (
-                    <Card key={index} className="p-4">
+                    <Card key={index} className="p-4 border-[#E0DAD0] bg-white">
                       <div className="flex justify-between items-start mb-3">
-                        <h4 className="text-sm">Education Entry {index + 1}</h4>
+                        <h4 className="text-sm font-medium text-[#111827]">Education Entry {index + 1}</h4>
                         <Button
                           type="button"
                           variant="ghost"
@@ -309,7 +364,7 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                       </div>
                       <div className="grid md:grid-cols-2 gap-3">
                         <div>
-                          <Label>Level</Label>
+                          <Label className="text-xs font-medium text-[#4B5563]">Level</Label>
                           <Input
                             value={edu.level}
                             onChange={(e) => updateEducation(index, 'level', e.target.value)}
@@ -317,7 +372,7 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                           />
                         </div>
                         <div>
-                          <Label>Institution</Label>
+                          <Label className="text-xs font-medium text-[#4B5563]">Institution</Label>
                           <Input
                             value={edu.institution}
                             onChange={(e) => updateEducation(index, 'institution', e.target.value)}
@@ -325,7 +380,7 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                           />
                         </div>
                         <div>
-                          <Label>Year</Label>
+                          <Label className="text-xs font-medium text-[#4B5563]">Year</Label>
                           <Input
                             value={edu.year}
                             onChange={(e) => updateEducation(index, 'year', e.target.value)}
@@ -333,7 +388,7 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                           />
                         </div>
                         <div>
-                          <Label>Status</Label>
+                          <Label className="text-xs font-medium text-[#4B5563]">Status</Label>
                           <Input
                             value={edu.status}
                             onChange={(e) => updateEducation(index, 'status', e.target.value)}
@@ -345,16 +400,16 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
                   ))}
                 </div>
               ) : (
-                <Card className="p-8 text-center text-gray-500">
+                <Card className="p-8 text-center text-gray-500 bg-white border-[#E0DAD0]">
                   <p>No education entries yet. Click "Add Education" to start.</p>
                 </Card>
               )}
             </TabsContent>
 
             {/* Career Tab */}
-            <TabsContent value="career" className="space-y-4">
+            <TabsContent value="career" className="space-y-5">
               <div className="flex justify-between items-center">
-                <h3>Career History</h3>
+                <h3 className="text-sm font-semibold text-[#2C3E2A]">Career History</h3>
                 <Button type="button" onClick={addCareer} size="sm">
                   <Plus className="size-4 mr-2" />
                   Add Career Entry
@@ -364,9 +419,9 @@ export default function DetailedEditModal({ open, onClose, person, onUpdate }: P
               {formData.career && formData.career.length > 0 ? (
                 <div className="space-y-4">
                   {formData.career.map((job, index) => (
-                    <Card key={index} className="p-4">
+                    <Card key={index} className="p-4 border-[#E0DAD0] bg-white">
                       <div className="flex justify-between items-start mb-3">
-                        <h4 className="text-sm">Career Entry {index + 1}</h4>
+                        <h4 className="text-sm font-medium text-[#111827]">Career Entry {index + 1}</h4>
                         <Button
                           type="button"
                           variant="ghost"
