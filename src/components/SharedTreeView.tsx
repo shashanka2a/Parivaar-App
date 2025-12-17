@@ -20,20 +20,39 @@ export default function SharedTreeView({ shareId, familySlug }: SharedTreeViewPr
 
   useEffect(() => {
     const identifier = shareId || familySlug;
-    if (identifier) {
-      const data = localStorage.getItem(`parivaar-shared-${identifier}`);
-      if (data) {
-        try {
-          const parsed = JSON.parse(data);
-          setSharedData(parsed);
-        } catch (err) {
-          toast.error('Failed to load shared family tree');
+    if (!identifier) return;
+
+    const loadSharedTree = async () => {
+      try {
+        const res = await fetch(`/api/shares/${identifier}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Shared family tree not found');
         }
-      } else {
-        toast.error('Shared family tree not found');
+
+        const data = await res.json();
+        const tree = data.familyTree;
+
+        setSharedData({
+          user: null,
+          familyTree: tree.persons || [],
+          theme: (tree.theme as any) || 'modern',
+          familyName: tree.name,
+          currentTreeId: tree.id,
+        });
+      } catch (err: any) {
+        console.error('Failed to load shared tree:', err);
+        toast.error(err.message || 'Failed to load shared family tree');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
+    };
+
+    loadSharedTree();
   }, [shareId, familySlug]);
 
   if (loading) {

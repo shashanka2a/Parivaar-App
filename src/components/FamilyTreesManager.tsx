@@ -136,22 +136,29 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
   };
 
   const handleShareTree = async (tree: FamilyTree) => {
-    // Create shareable URL with family name
-    const familySlug = tree.name.toLowerCase().replace(/\s+/g, '-');
-    const shareUrl = `${window.location.origin}/${familySlug}`;
-    
-    // Store the tree data for sharing
-    const treeData = localStorage.getItem(`parivaar-tree-${tree.id}`);
-    if (treeData) {
-      localStorage.setItem(`parivaar-shared-${familySlug}`, treeData);
-    }
-    
-    // Copy to clipboard
     try {
+      const res = await fetch('/api/shares', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ treeId: tree.id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to create share link');
+      }
+
+      const data = await res.json();
+      const shareUrl =
+        data.url ||
+        `${window.location.origin}/shared/${data.shareId}`;
+
       await navigator.clipboard.writeText(shareUrl);
       toast.success('Share link copied to clipboard!');
-    } catch (err) {
-      toast.error('Failed to copy link');
+    } catch (err: any) {
+      console.error('Share tree failed:', err);
+      toast.error(err.message || 'Failed to copy link');
     }
   };
 

@@ -53,40 +53,50 @@ export default function TreeDashboard({ appState, setAppState }: Props) {
   };
 
   const handleShare = async () => {
-    const familyName = appState.familyName || appState.user?.name?.split(' ')[0] || 'family';
-    const timestamp = Date.now();
-    const shareId = `${familyName.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
-    const shareUrl = `${window.location.origin}/#/shared/${shareId}`;
-    
+    if (!appState.currentTreeId) {
+      toast.error('No family tree selected to share');
+      return;
+    }
+
     try {
+      const res = await fetch('/api/shares', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ treeId: appState.currentTreeId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to create share link');
+      }
+
+      const data = await res.json();
+      const shareUrl =
+        data.url ||
+        `${window.location.origin}/shared/${data.shareId}`;
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(shareUrl);
         toast.success('Share link copied to clipboard!', {
           description: shareUrl,
         });
       } else {
-        // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = shareUrl;
         textArea.style.position = 'fixed';
         textArea.style.left = '-999999px';
         document.body.appendChild(textArea);
         textArea.select();
-        try {
-          document.execCommand('copy');
-          toast.success('Share link copied to clipboard!', {
-            description: shareUrl,
-          });
-        } catch (err) {
-          toast.error('Failed to copy link. Please copy manually.');
-        }
+        document.execCommand('copy');
         document.body.removeChild(textArea);
+        toast.success('Share link copied to clipboard!', {
+          description: shareUrl,
+        });
       }
-      
-      // Save the shared tree data to localStorage with the shareId
-      localStorage.setItem(`parivaar-shared-${shareId}`, JSON.stringify(appState));
-    } catch (err) {
-      toast.error('Failed to generate share link');
+    } catch (err: any) {
+      console.error('Share link creation failed:', err);
+      toast.error(err.message || 'Failed to generate share link');
     }
   };
 
