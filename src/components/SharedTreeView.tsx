@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import { AppState } from '@/lib/state-context';
 import FamilyCanvas from './FamilyCanvas';
 import { toast } from 'sonner';
+import LoadingOverlay from './LoadingOverlay';
 
 interface SharedTreeViewProps {
   shareId?: string;
@@ -58,10 +59,7 @@ export default function SharedTreeView({ shareId, familySlug }: SharedTreeViewPr
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <TreePine className="size-16 text-[#22C55E] mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Loading family tree...</p>
-        </div>
+        <LoadingOverlay show message="Loading shared family tree..." />
       </div>
     );
   }

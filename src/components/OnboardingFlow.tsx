@@ -9,6 +9,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { AppState } from '@/lib/state-context';
+import { toast } from 'sonner';
 
 interface Props {
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
@@ -24,27 +25,68 @@ export default function OnboardingFlow({ setAppState }: Props) {
   const [contact, setContact] = useState('');
   const [familyName, setFamilyName] = useState('');
 
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (mode === 'signup') {
-      // Handle signup
-      if (email && password && name && contact) {
+
+    try {
+      if (mode === 'signup') {
+        if (!email || !password || !name || !contact) return;
+
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password, name }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          toast.error(data.error || 'Failed to sign up. Please try again.');
+          return;
+        }
+
+        const userName = data.user?.name || name;
+        const userEmail = data.user?.email || email;
+
         setAppState(prev => ({
           ...prev,
-          user: { name, email },
+          user: { name: userName, email: userEmail },
         }));
+
+        toast.success('Account created successfully');
         setStep('familyName');
-      }
-    } else {
-      // Handle login
-      if (email && password) {
+      } else {
+        if (!email || !password) return;
+
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          toast.error(data.error || 'Failed to log in. Please check your credentials.');
+          return;
+        }
+
+        const userName = data.user?.name || data.user?.email?.split('@')[0] || 'User';
+        const userEmail = data.user?.email || email;
+
         setAppState(prev => ({
           ...prev,
-          user: { name: 'User', email },
+          user: { name: userName, email: userEmail },
         }));
+
+        toast.success('Logged in successfully');
         setStep('familyName');
       }
+    } catch (err: any) {
+      console.error('Onboarding auth error:', err);
+      toast.error('Something went wrong. Please try again.');
     }
   };
 

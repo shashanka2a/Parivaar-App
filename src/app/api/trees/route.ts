@@ -7,14 +7,15 @@ export const runtime = 'nodejs';
 // GET /api/trees - list trees for current user
 export async function GET() {
   try {
+    // Same auth pattern as /api/auth/me
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user || !user.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Ensure Prisma user exists
+    // Ensure Prisma user exists and load their trees
     const dbUser = await prisma.user.upsert({
       where: { email: user.email },
       update: {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user || !user.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const dbUser = await prisma.user.upsert({

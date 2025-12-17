@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
+import LoadingOverlay from './LoadingOverlay';
 
 interface FamilyTree {
   id: string;
@@ -41,6 +42,8 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
   const [trees, setTrees] = useState<FamilyTree[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTreeName, setNewTreeName] = useState('');
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [deletingTreeId, setDeletingTreeId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTrees = async () => {
@@ -59,6 +62,8 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
         );
       } catch (error) {
         console.error('Failed to load trees:', error);
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -110,6 +115,7 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
 
   const handleDeleteTree = async (treeId: string, treeName: string) => {
     try {
+      setDeletingTreeId(treeId);
       const res = await fetch(`/api/trees/${treeId}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -127,6 +133,8 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
     } catch (error: any) {
       console.error('Delete tree failed:', error);
       toast.error(error.message || 'Failed to delete tree');
+    } finally {
+      setDeletingTreeId(null);
     }
   };
 
@@ -163,7 +171,11 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3EF] flex flex-col">
+    <div className="min-h-screen bg-[#F5F3EF] flex flex-col relative">
+      <LoadingOverlay
+        show={initialLoading}
+        message="Loading your family trees..."
+      />
       {/* Header */}
       <header className="bg-white border-b border-[#D9D5CE]/50 px-6 py-4 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -260,10 +272,11 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button
+                              <Button
                             variant="ghost"
                             size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:bg-red-50"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                disabled={deletingTreeId === tree.id}
                           >
                             <Trash2 className="size-4" />
                           </Button>
@@ -279,7 +292,7 @@ export default function FamilyTreesManager({ userName, onSelectTree, onLogout }:
                             <AlertDialogCancel className="border-[#D9D5CE] text-[#2C3E2A] hover:bg-[#F5F3EF]">
                               Cancel
                             </AlertDialogCancel>
-                            <AlertDialogAction
+                              <AlertDialogAction
                               onClick={() => handleDeleteTree(tree.id, tree.name)}
                               className="bg-red-600 hover:bg-red-700 text-white"
                             >

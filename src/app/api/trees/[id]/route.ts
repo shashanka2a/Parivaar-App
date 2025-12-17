@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
 
-// Helper to ensure the current user owns the tree
+// Helper to ensure the current authenticated user owns the tree
 async function requireOwnTree(treeId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
