@@ -54,3 +54,4 @@ npm run db:push:supabase # Push schema with password prompt
 - [Prisma Setup Documentation](../docs/PRISMA_SETUP.md)
 - [Supabase Setup Documentation](../docs/SUPABASE_SETUP.md)
 
+

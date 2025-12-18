@@ -124,3 +124,4 @@ DATABASE_URL="postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co
 
 **Note**: Never commit `.env.local` to git (it's in `.gitignore`)
 
+

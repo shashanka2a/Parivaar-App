@@ -97,3 +97,4 @@ If you want to keep email confirmation ON but auto-confirm certain emails:
 **Issue:** Users still can't log in after signup
 - **Solution:** Verify the setting is actually OFF, check browser console for errors, verify Supabase project URL matches
 
+
