@@ -11,11 +11,20 @@ export async function GET() {
     : 'NOT SET';
 
   // Try to connect to database
-  let connectionTest = { success: false, error: null as any };
+  let connectionTest = { success: false, error: null as any, rawQuery: false };
   try {
     await prisma.$connect();
+    
+    // Sanity check: Raw query test (decisive test for Prisma engine)
+    try {
+      const rawResult = await prisma.$queryRaw`SELECT 1 as test`;
+      connectionTest.rawQuery = Array.isArray(rawResult) && rawResult.length > 0;
+    } catch (rawError: any) {
+      connectionTest.rawQuery = false;
+    }
+    
     const userCount = await prisma.user.count();
-    connectionTest = { success: true, error: null };
+    connectionTest = { success: true, error: null, rawQuery: connectionTest.rawQuery };
     await prisma.$disconnect();
   } catch (error: any) {
     connectionTest = { 
@@ -24,7 +33,8 @@ export async function GET() {
         message: error.message,
         code: error.code,
         name: error.name,
-      }
+      },
+      rawQuery: false,
     };
     try {
       await prisma.$disconnect();
