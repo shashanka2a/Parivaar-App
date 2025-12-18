@@ -46,19 +46,19 @@ npm install prisma @prisma/client
 Create a `.env.local` file in the root directory with your Supabase connection string:
 ```env
 # Supabase PostgreSQL Connection
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
 
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://frxpbnoornbecjutllfv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NDU4MDcsImV4cCI6MjA3ODUyMTgwN30.9D8gIrXT1PLeQ3Rtm6W3LulAMCaadz-XbRttbGQQGEo
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0NTgwNywiZXhwIjoyMDc4NTIxODA3fQ.wyfgKupWKjivBqjVl53kS5tiy1eenwhaeq6fp9bm614
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
 
 **Note**: Replace `[YOUR-PASSWORD]` with your Supabase database password. Get it from Supabase Dashboard > Settings > Database.
 
 For migrations, you may need to use the direct connection (without pgbouncer):
 ```env
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
 ```
 
 ### 3. Generate Prisma Client

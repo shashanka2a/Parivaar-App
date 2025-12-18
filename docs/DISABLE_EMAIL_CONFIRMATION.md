@@ -7,7 +7,7 @@
    - Log in with your account
 
 2. **Select Your Project**
-   - Click on project: `frxpbnoornbecjutllfv`
+   - Click on project: `YOUR_PROJECT_REF`
 
 3. **Navigate to Authentication Settings**
    - In the left sidebar, click **Authentication**
@@ -46,7 +46,7 @@ Supabase Dashboard
 
 ## Current Project Settings
 
-**Project URL:** `https://frxpbnoornbecjutllfv.supabase.co`
+**Project URL:** `https://YOUR_PROJECT_REF.supabase.co`
 
 **Required Setting:**
 - ✅ **Confirm Email**: OFF (disabled)

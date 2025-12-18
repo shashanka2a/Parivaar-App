@@ -4,7 +4,7 @@
 
 The application was failing with:
 ```
-Can't reach database server at `db.frxpbnoornbecjutllfv.supabase.co:5432`
+Can't reach database server at `db.YOUR_PROJECT_REF.supabase.co:5432`
 ```
 
 ## Root Cause
@@ -15,7 +15,7 @@ The `.env.local` file was missing, so `DATABASE_URL` was not set. Prisma couldn'
 
 1. **Created `.env.local`** with correct Supabase connection string:
    ```env
-   DATABASE_URL="postgresql://postgres:2fp3qgLTmkrSSx6U@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
    ```
 
 2. **Used direct connection** (not pgbouncer) for Prisma compatibility
@@ -89,7 +89,7 @@ This creates:
    ```bash
    cat .env.local | grep DATABASE_URL
    ```
-   Should be: `postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres`
+   Should be: `postgresql://postgres:PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres`
 
 3. **Test connection directly**:
    ```bash
@@ -97,8 +97,8 @@ This creates:
    ```
 
 4. **Check Supabase project status**:
-   - Go to: https://supabase.com/dashboard/project/frxpbnoornbecjutllfv
-   - Verify project is active (not paused)
+   - Go to: https://supabase.com/dashboard
+   - Select your project and verify it's active (not paused)
 
 5. **Verify database password**:
    - Supabase Dashboard → Settings → Database
@@ -116,10 +116,10 @@ This creates:
 
 Required in `.env.local`:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://frxpbnoornbecjutllfv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-DATABASE_URL="postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+DATABASE_URL="postgresql://postgres:PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
 ```
 
 **Note**: Never commit `.env.local` to git (it's in `.gitignore`)

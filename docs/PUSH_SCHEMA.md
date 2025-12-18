@@ -23,13 +23,13 @@ node push-schema.js
 
 1. **Get your database password** from Supabase Dashboard:
    - Go to: https://supabase.com/dashboard
-   - Project: `frxpbnoornbecjutllfv`
+   - Project: `YOUR_PROJECT_REF`
    - Settings > Database
    - Copy your database password
 
 2. **Set DATABASE_URL and push:**
    ```bash
-   export DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+   export DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
    npx prisma generate
    npx prisma db push
    ```
@@ -38,7 +38,7 @@ node push-schema.js
 
 1. **Create `.env.local` file:**
    ```env
-   DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+   DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
    ```
 
 2. **Then run:**

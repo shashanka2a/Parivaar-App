@@ -54,7 +54,7 @@ Before testing, make sure you have a `.env.local` file with:
 ### Getting Your Database Password
 
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select project: `frxpbnoornbecjutllfv`
+2. Select project: `YOUR_PROJECT_REF`
 3. Go to **Settings** > **Database**
 4. Find or reset your database password
 5. Replace `[YOUR-PASSWORD]` in `DATABASE_URL`
@@ -72,7 +72,7 @@ Before testing, make sure you have a `.env.local` file with:
     "details": {
       "anonClient": { "connected": true },
       "adminClient": { "connected": true },
-      "url": "https://frxpbnoornbecjutllfv.supabase.co"
+      "url": "https://YOUR_PROJECT_REF.supabase.co"
     }
   },
   "prisma": {

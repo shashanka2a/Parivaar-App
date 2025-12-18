@@ -10,20 +10,20 @@ Create a `.env.local` file in the root directory with the following variables:
 
 ```env
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://frxpbnoornbecjutllfv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NDU4MDcsImV4cCI6MjA3ODUyMTgwN30.9D8gIrXT1PLeQ3Rtm6W3LulAMCaadz-XbRttbGQQGEo
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 
 # Supabase Service Role Key (Server-side only)
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeHBibm9vcm5iZWNqdXRsbGZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0NTgwNywiZXhwIjoyMDc4NTIxODA3fQ.wyfgKupWKjivBqjVl53kS5tiy1eenwhaeq6fp9bm614
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
 # Prisma Database URL (Supabase PostgreSQL)
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
 ```
 
 ### Getting Your Database Password
 
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project: `frxpbnoornbecjutllfv`
+2. Select your project: `YOUR_PROJECT_REF`
 3. Go to **Settings** > **Database**
 4. Find your database password (or reset it if needed)
 5. Replace `[YOUR-PASSWORD]` in the `DATABASE_URL` with your actual password
@@ -37,7 +37,7 @@ DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supa
 
 **Note**: For Prisma migrations, you may need to use the direct connection (without `pgbouncer`):
 ```env
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.YOUR_PROJECT_REF.supabase.co:5432/postgres"
 ```
 
 ## Files Created
@@ -181,7 +181,7 @@ export async function GET(request: Request) {
 To allow users to sign up and immediately access the app without email verification:
 
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project: `frxpbnoornbecjutllfv`
+2. Select your project: `YOUR_PROJECT_REF`
 3. Navigate to **Authentication** → **Providers**
 4. Click on **Email** provider
 5. Find the **Confirm Email** toggle
