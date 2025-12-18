@@ -35,7 +35,7 @@ export async function GET() {
       },
     });
 
-    const trees = dbUser.familyTrees.map((tree) => ({
+    const trees = dbUser.familyTrees.map((tree: typeof dbUser.familyTrees[0]) => ({
       id: tree.id,
       name: tree.name,
       slug: tree.slug,
