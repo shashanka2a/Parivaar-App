@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
+import { pool, query } from '@/lib/db-pooler';
 
 // Force Node.js runtime (not Edge) for Prisma support
 export const runtime = 'nodejs';
@@ -14,6 +15,11 @@ export async function GET() {
       details: {} as any,
     },
     prisma: {
+      connected: false,
+      error: null as string | null,
+      details: {} as any,
+    },
+    pooler: {
       connected: false,
       error: null as string | null,
       details: {} as any,
@@ -98,6 +104,49 @@ export async function GET() {
     } catch {
       // Ignore disconnect errors
     }
+  }
+
+  // Test Pooler Connection (DATABASE_URL - port 6543)
+  try {
+    if (!process.env.DATABASE_URL) {
+      results.pooler.error = 'DATABASE_URL environment variable not set';
+      results.pooler.details = { 
+        error: 'DATABASE_URL is optional but recommended for raw SQL, Drizzle, Kysely',
+        tip: 'Set DATABASE_URL to pooler connection string: postgresql://postgres.<project>:<password>@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require'
+      };
+    } else {
+      // Test pooler connection
+      const client = await pool.connect();
+      try {
+        // Test raw query
+        const testResult = await query('SELECT 1 as test, NOW() as timestamp');
+        const userCount = await query('SELECT COUNT(*) as count FROM users');
+        const treeCount = await query('SELECT COUNT(*) as count FROM family_trees');
+
+        results.pooler.connected = true;
+        results.pooler.details = {
+          connected: true,
+          rawQuery: Array.isArray(testResult) && testResult.length > 0,
+          userCount: userCount[0]?.count || 0,
+          treeCount: treeCount[0]?.count || 0,
+          poolStats: {
+            totalCount: pool.totalCount,
+            idleCount: pool.idleCount,
+            waitingCount: pool.waitingCount,
+          },
+          databaseUrl: process.env.DATABASE_URL?.replace(/:[^:@]+@/, ':****@') || 'Not set',
+        };
+      } finally {
+        client.release();
+      }
+    }
+  } catch (error: any) {
+    results.pooler.error = error.message || 'Failed to connect to pooler';
+    results.pooler.details = { 
+      error: error.toString(),
+      code: error.code,
+      tip: 'Check DATABASE_URL format. Should be pooler URL (port 6543) with pgbouncer=true'
+    };
   }
 
   // Determine overall status
