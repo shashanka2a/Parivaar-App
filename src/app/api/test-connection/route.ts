@@ -22,7 +22,8 @@ export async function GET() {
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       hasSupabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      hasDirectUrl: !!process.env.DIRECT_URL,
+      hasDatabaseUrl: !!process.env.DATABASE_URL, // Pooler URL (for other clients)
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not set',
     },
   };
@@ -58,11 +59,11 @@ export async function GET() {
 
   // Test Prisma Connection
   try {
-    if (!process.env.DATABASE_URL) {
-      results.prisma.error = 'DATABASE_URL environment variable not set';
+    if (!process.env.DIRECT_URL) {
+      results.prisma.error = 'DIRECT_URL environment variable not set';
       results.prisma.details = { 
-        error: 'Please set DATABASE_URL in .env.local file',
-        tip: 'Get connection string from Supabase Dashboard > Settings > Database'
+        error: 'Please set DIRECT_URL in .env.local file',
+        tip: 'Get direct connection string from Supabase Dashboard > Settings > Database (use direct connection, port 5432)'
       };
     } else {
       // Test database connection
@@ -77,7 +78,7 @@ export async function GET() {
         connected: true,
         userCount,
         treeCount,
-        databaseUrl: process.env.DATABASE_URL?.replace(/:[^:@]+@/, ':****@') || 'Not set', // Hide password
+        directUrl: process.env.DIRECT_URL?.replace(/:[^:@]+@/, ':****@') || 'Not set', // Hide password
       };
       
       await prisma.$disconnect();
@@ -87,7 +88,7 @@ export async function GET() {
     results.prisma.details = { 
       error: error.toString(),
       code: error.code,
-      tip: error.code === 'P1001' ? 'Check DATABASE_URL and ensure database is accessible' : 
+      tip: error.code === 'P1001' ? 'Check DIRECT_URL and ensure database is accessible' : 
             error.code === 'P1003' ? 'Run: npx prisma migrate dev' : 
             'Check your database connection settings'
     };

@@ -5,9 +5,9 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   const isVercel = !!process.env.VERCEL;
-  const hasDatabaseUrl = !!process.env.DATABASE_URL;
-  const dbUrlPreview = process.env.DATABASE_URL 
-    ? process.env.DATABASE_URL.substring(0, 50) + '...' 
+  const hasDirectUrl = !!process.env.DIRECT_URL;
+  const directUrlPreview = process.env.DIRECT_URL 
+    ? process.env.DIRECT_URL.substring(0, 50) + '...' 
     : 'NOT SET';
 
   // Try to connect to database
@@ -50,12 +50,12 @@ export async function GET() {
       vercelEnv: process.env.VERCEL_ENV,
     },
     database: {
-      hasDatabaseUrl,
-      dbUrlPreview,
+      hasDirectUrl,
+      directUrlPreview,
       connectionTest,
     },
     allEnvVars: {
-      DATABASE_URL: hasDatabaseUrl,
+      DIRECT_URL: hasDirectUrl,
       NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,

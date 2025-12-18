@@ -21,11 +21,11 @@ function question(query) {
 async function pushSchema() {
   console.log('🚀 Pushing Prisma Schema to Supabase...\n');
 
-  let databaseUrl = process.env.DATABASE_URL;
+  let directUrl = process.env.DIRECT_URL;
   let password = process.argv[2];
 
-  // If DATABASE_URL is not set, try to construct it
-  if (!databaseUrl) {
+  // If DIRECT_URL is not set, try to construct it
+  if (!directUrl) {
     if (!password) {
       console.log('📝 Database password required to push schema.\n');
       password = await question('Enter your Supabase database password: ');
@@ -39,11 +39,11 @@ async function pushSchema() {
       process.exit(1);
     }
 
-    databaseUrl = `postgresql://postgres:${password}@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres`;
+    directUrl = `postgresql://postgres:${password}@db.YOUR_PROJECT_REF.supabase.co:5432/postgres?sslmode=require`;
   }
 
-  // Set DATABASE_URL for this process
-  process.env.DATABASE_URL = databaseUrl;
+  // Set DIRECT_URL for this process (Prisma uses DIRECT_URL)
+  process.env.DIRECT_URL = directUrl;
 
   try {
     console.log('📦 Generating Prisma client...');
@@ -57,7 +57,7 @@ async function pushSchema() {
     console.log('\n📊 Next steps:');
     console.log('   1. Verify tables: npx prisma studio');
     console.log('   2. Test connection: npm run dev (then visit /api/test-connection)');
-    console.log('   3. Create .env.local with DATABASE_URL for future use');
+    console.log('   3. Create .env.local with DIRECT_URL for Prisma');
   } catch (error) {
     console.log('\n❌ Failed to push schema');
     console.log('\n💡 Common issues:');

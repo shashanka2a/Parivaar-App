@@ -48,13 +48,13 @@ export async function GET(request: Request) {
     // Test 1: Environment Variables
     const hasSupabaseUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
     const hasSupabaseKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const hasDatabaseUrl = !!process.env.DATABASE_URL;
+    const hasDirectUrl = !!process.env.DIRECT_URL;
 
-    testResults.tests.environment.passed = hasSupabaseUrl && hasSupabaseKey && hasDatabaseUrl;
+    testResults.tests.environment.passed = hasSupabaseUrl && hasSupabaseKey && hasDirectUrl;
     testResults.tests.environment.details = {
       hasSupabaseUrl,
       hasSupabaseKey,
-      hasDatabaseUrl,
+      hasDirectUrl,
     };
 
     if (!testResults.tests.environment.passed) {
