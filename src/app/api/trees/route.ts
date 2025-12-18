@@ -47,21 +47,31 @@ export async function GET() {
 
     return NextResponse.json({ trees }, { status: 200 });
   } catch (error: any) {
+    const isVercel = !!process.env.VERCEL;
     console.error('GET /api/trees failed:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+    console.error('Is Vercel:', isVercel);
     
     // Provide helpful error message
     let errorMessage = error.message || 'Failed to load trees';
-    if (error.message?.includes("Can't reach database server")) {
-      errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+    if (error.message?.includes("Can't reach database server") || error.code === 'P1001') {
+      if (isVercel) {
+        errorMessage = 'Database connection failed. Check Vercel logs for details. Verify DATABASE_URL format and that Supabase project is active.';
+      } else {
+        errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+      }
     }
     
     return NextResponse.json({ 
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? {
+      details: {
         code: error.code,
         hasDatabaseUrl: !!process.env.DATABASE_URL,
-      } : undefined,
+        isVercel: isVercel,
+        dbUrlPreview: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : 'NOT SET',
+      },
     }, { status: 500 });
   }
 }
@@ -123,21 +133,31 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error: any) {
+    const isVercel = !!process.env.VERCEL;
     console.error('POST /api/trees failed:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+    console.error('Is Vercel:', isVercel);
     
     // Provide helpful error message
     let errorMessage = error.message || 'Failed to create tree';
-    if (error.message?.includes("Can't reach database server")) {
-      errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+    if (error.message?.includes("Can't reach database server") || error.code === 'P1001') {
+      if (isVercel) {
+        errorMessage = 'Database connection failed. Check Vercel logs for details. Verify DATABASE_URL format and that Supabase project is active.';
+      } else {
+        errorMessage = 'Database connection failed. Please check DATABASE_URL in .env.local and restart the dev server.';
+      }
     }
     
     return NextResponse.json({ 
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? {
+      details: {
         code: error.code,
         hasDatabaseUrl: !!process.env.DATABASE_URL,
-      } : undefined,
+        isVercel: isVercel,
+        dbUrlPreview: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : 'NOT SET',
+      },
     }, { status: 500 });
   }
 }

@@ -9,16 +9,56 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Validate DATABASE_URL before creating Prisma client
-if (!process.env.DATABASE_URL) {
-  console.error('❌ DATABASE_URL is not set! Please check your .env.local file.');
-  console.error('   Expected: DATABASE_URL="postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"');
+const isVercel = !!process.env.VERCEL;
+let connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  if (isVercel) {
+    console.error('❌ DATABASE_URL is not set in Vercel environment variables!');
+    console.error('   Go to: Vercel Dashboard → Project Settings → Environment Variables');
+    console.error('   Add: DATABASE_URL="postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co:6543/postgres?pgbouncer=true"');
+    console.error('   Use port 6543 (connection pooler) for Vercel!');
+    console.error('   Then REDEPLOY the project!');
+  } else {
+    console.error('❌ DATABASE_URL is not set! Please check your .env.local file.');
+    console.error('   Expected: DATABASE_URL="postgresql://postgres:PASSWORD@db.frxpbnoornbecjutllfv.supabase.co:5432/postgres"');
+  }
+} else if (isVercel) {
+  // For Vercel/serverless, we MUST use connection pooler (port 6543)
+  // Direct connection (port 5432) doesn't work in serverless environments
+  if (connectionString.includes(':5432/')) {
+    console.warn('⚠️  WARNING: Using direct connection (port 5432) on Vercel!');
+    console.warn('   Converting to connection pooler (port 6543) for serverless compatibility...');
+    
+    // Convert to connection pooler URL
+    connectionString = connectionString.replace(':5432/', ':6543/');
+    
+    // Add pgbouncer parameter if not present
+    if (!connectionString.includes('pgbouncer=true')) {
+      const separator = connectionString.includes('?') ? '&' : '?';
+      connectionString = `${connectionString}${separator}pgbouncer=true`;
+    }
+    
+    // Add connection timeout parameters for serverless
+    const timeoutParams = '&connect_timeout=10&pool_timeout=10';
+    if (!connectionString.includes('connect_timeout')) {
+      connectionString = `${connectionString}${timeoutParams}`;
+    }
+    
+    console.log('✅ Converted to connection pooler URL');
+  }
+  
+  // Log that DATABASE_URL is set (but not the value for security)
+  console.log('✅ DATABASE_URL is set in Vercel');
+  const dbUrlPreview = connectionString.substring(0, 50);
+  console.log(`   Preview: ${dbUrlPreview}...`);
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      url: connectionString,
     },
   },
 });
